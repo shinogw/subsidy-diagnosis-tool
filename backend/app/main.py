@@ -11,7 +11,7 @@ app = FastAPI(
 
 import os
 
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,https://subsidy-diagnosis-tool-qhs2.vercel.app").split(",")
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,https://subsidy-diagnosis-tool-bzv5.vercel.app").split(",")
 
 app.add_middleware(
     CORSMiddleware,
