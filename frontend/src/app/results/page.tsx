@@ -106,7 +106,8 @@ export default function Results() {
             {/* 総額サマリー */}
             <div className="bg-blue-600 text-white rounded-lg shadow p-6 mb-6 text-center">
               <p className="text-sm opacity-80 mb-1">あなたがマッチした補助金の総額</p>
-              <p className="text-4xl font-bold mb-1">{formatAmount(totalEstimated)}</p>
+              <p className="text-4xl font-bold mb-1">{formatAmount(activeMatches.reduce((sum, m) => sum + (m.max_amount || 0), 0))}</p>
+              <p className="text-sm opacity-80 mt-1">（受給目安額の合計: {formatAmount(totalEstimated)}）</p>
               <p className="text-sm opacity-80">{activeMatches.length}件の補助金が対象</p>
             </div>
 
@@ -147,7 +148,7 @@ export default function Results() {
 
                       <div className="grid grid-cols-2 gap-4 mb-3">
                         <div>
-                          <span className="text-xs text-gray-500">概算補助額</span>
+                          <span className="text-xs text-gray-500">受給目安額</span>
                           <p className="text-xl font-bold text-blue-600">{formatAmount(m.estimated_amount)}</p>
                         </div>
                         <div>
