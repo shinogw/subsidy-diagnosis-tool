@@ -114,11 +114,16 @@ export default function Results() {
               <p className="text-sm opacity-80">{activeMatches.length}件の補助金が対象</p>
             </div>
 
-            {/* 一括申請ボタン */}
+            {/* LINE@一括申請ボタン */}
             <div className="mb-6">
-              <button className="w-full bg-green-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-green-700 transition-colors">
-                補助対象の補助金を一括で申請する
-              </button>
+              <a
+                href={`https://line.me/R/ti/p/DUMMY_LINE_ID?subsidies=${activeMatches.map(m => m.subsidy_id).join(",")}&total=${totalEstimated}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full bg-[#06C755] text-white py-4 rounded-lg font-bold text-lg hover:bg-[#05b34c] transition-colors text-center"
+              >
+                LINE@から一括申請する
+              </a>
               <p className="text-xs text-gray-400 text-center mt-2">提携行政書士が申請をサポートします</p>
             </div>
 

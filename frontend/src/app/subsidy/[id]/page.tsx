@@ -174,10 +174,15 @@ export default function SubsidyDetail() {
 
           {/* CTA */}
           <div className="mt-8 p-4 bg-gray-50 rounded-lg text-center">
-            <p className="text-gray-600 mb-3">この補助金に興味がありますか？</p>
-            <button className="bg-blue-600 text-white px-8 py-3 rounded-md font-medium hover:bg-blue-700">
-              無料相談を申し込む
-            </button>
+            <p className="text-gray-600 mb-3">この補助金を申請しますか？</p>
+            <a
+              href={`https://line.me/R/ti/p/DUMMY_LINE_ID?subsidy=${params.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-[#06C755] text-white px-8 py-3 rounded-md font-medium hover:bg-[#05b34c]"
+            >
+              LINE@から申請する
+            </a>
             <p className="text-xs text-gray-400 mt-2">提携行政書士が申請をサポートします</p>
           </div>
         </div>
