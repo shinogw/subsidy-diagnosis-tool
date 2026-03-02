@@ -21,7 +21,7 @@ async def init():
     from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
     Session = async_sessionmaker(engine, class_=AsyncSession)
 
-    with open(os.path.join(os.path.dirname(__file__), "..", "data", "seed_subsidies.json")) as f:
+    with open(os.path.join(os.path.dirname(__file__), "data", "seed_subsidies.json")) as f:
         seeds = json.load(f)
 
     from datetime import date as dt_date
