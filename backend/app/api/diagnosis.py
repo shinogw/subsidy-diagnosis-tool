@@ -71,8 +71,10 @@ async def diagnose(company_data: CompanyCreate, db: AsyncSession = Depends(get_d
 @router.get("/diagnosis/{company_id}/results", response_model=DiagnosisResponse)
 async def get_results(company_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     """過去の診断結果を取得"""
+    from sqlalchemy.orm import selectinload
     result = await db.execute(
         select(MatchResult)
+        .options(selectinload(MatchResult.subsidy))
         .where(MatchResult.company_id == company_id)
         .order_by(MatchResult.recommendation_rank)
     )

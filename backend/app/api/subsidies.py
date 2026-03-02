@@ -41,7 +41,9 @@ async def get_subsidy(subsidy_id: uuid.UUID, db: AsyncSession = Depends(get_db))
     return subsidy
 
 
-@router.post("/subsidies", response_model=SubsidyResponse, status_code=201)
+from app.api.auth import require_admin
+
+@router.post("/subsidies", response_model=SubsidyResponse, status_code=201, dependencies=[Depends(require_admin)])
 async def create_subsidy(data: SubsidyCreate, db: AsyncSession = Depends(get_db)):
     """補助金データ追加"""
     subsidy = Subsidy(**data.model_dump())
@@ -51,7 +53,7 @@ async def create_subsidy(data: SubsidyCreate, db: AsyncSession = Depends(get_db)
     return subsidy
 
 
-@router.put("/subsidies/{subsidy_id}", response_model=SubsidyResponse)
+@router.put("/subsidies/{subsidy_id}", response_model=SubsidyResponse, dependencies=[Depends(require_admin)])
 async def update_subsidy(
     subsidy_id: uuid.UUID, data: SubsidyCreate, db: AsyncSession = Depends(get_db)
 ):

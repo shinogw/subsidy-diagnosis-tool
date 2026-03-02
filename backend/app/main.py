@@ -9,12 +9,16 @@ app = FastAPI(
     description="中小企業向け補助金マッチング・書類自動生成API",
 )
 
+import os
+
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "PATCH"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 app.include_router(diagnosis.router, prefix="/api/v1", tags=["diagnosis"])
