@@ -32,7 +32,6 @@ export default function Home() {
     has_wage_increase_plan: false,
     has_gbiz_id: false,
     investment_purposes: [] as string[],
-    investment_amount: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -53,7 +52,6 @@ export default function Home() {
       annual_revenue: form.annual_revenue ? parseInt(form.annual_revenue) * 10000 : null,
       capital: form.capital ? parseInt(form.capital) * 10000 : null,
       established_year: form.established_year ? parseInt(form.established_year) : null,
-      investment_amount: form.investment_amount ? parseInt(form.investment_amount) * 10000 : null,
       investment_purpose: form.investment_purposes.join("、"),
     };
 
@@ -193,24 +191,6 @@ export default function Home() {
                 </label>
               ))}
             </div>
-          </div>
-
-          {/* 想定投資額 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">想定投資額</label>
-            <select name="investment_amount" value={form.investment_amount} onChange={handleChange}
-              className="w-full border rounded-md px-3 py-2 text-gray-900">
-              <option value="">選択してください</option>
-              <option value="25">50万円未満</option>
-              <option value="75">50〜100万円</option>
-              <option value="150">100〜200万円</option>
-              <option value="350">200〜500万円</option>
-              <option value="750">500〜1,000万円</option>
-              <option value="1500">1,000〜2,000万円</option>
-              <option value="3500">2,000〜5,000万円</option>
-              <option value="7500">5,000万〜1億円</option>
-              <option value="15000">1億円以上</option>
-            </select>
           </div>
 
           {/* チェックボックス */}
