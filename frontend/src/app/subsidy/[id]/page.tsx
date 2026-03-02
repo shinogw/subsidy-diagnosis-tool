@@ -62,7 +62,8 @@ export default function SubsidyDetail() {
 
   useEffect(() => {
     if (!params.id) return;
-    fetch(`http://localhost:8000/api/v1/subsidies/${params.id}`)
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    fetch(`${apiUrl}/api/v1/subsidies/${params.id}`)
       .then((res) => {
         if (!res.ok) throw new Error("Not found");
         return res.json();
