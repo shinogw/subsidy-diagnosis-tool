@@ -31,7 +31,7 @@ export default function Home() {
     prefecture: "東京都",
     has_wage_increase_plan: false,
     has_gbiz_id: false,
-    investment_purpose: "",
+    investment_purposes: [] as string[],
     investment_amount: "",
   });
 
@@ -54,6 +54,7 @@ export default function Home() {
       capital: form.capital ? parseInt(form.capital) * 10000 : null,
       established_year: form.established_year ? parseInt(form.established_year) : null,
       investment_amount: form.investment_amount ? parseInt(form.investment_amount) * 10000 : null,
+      investment_purpose: form.investment_purposes.join("、"),
     };
 
     try {
@@ -160,13 +161,38 @@ export default function Home() {
 
           {/* 投資目的 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">投資目的・導入したいもの</label>
-            <textarea
-              name="investment_purpose" rows={3}
-              value={form.investment_purpose} onChange={handleChange}
-              className="w-full border rounded-md px-3 py-2 text-gray-900"
-              placeholder="例: AI導入によるDX推進、クラウドシステムの構築"
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-2">投資目的・導入したいもの（複数選択可）</label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                "AI導入・DX推進",
+                "業務効率化・省力化",
+                "新製品・新サービス開発",
+                "販路拡大・EC構築",
+                "設備投資・機械導入",
+                "人材育成・採用強化",
+                "事業承継・M&A",
+                "海外展開",
+                "IT導入（クラウド・SaaS）",
+                "賃上げ・労働環境改善",
+              ].map((purpose) => (
+                <label key={purpose} className="flex items-center gap-2 p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.investment_purposes.includes(purpose)}
+                    onChange={(e) => {
+                      setForm((prev) => ({
+                        ...prev,
+                        investment_purposes: e.target.checked
+                          ? [...prev.investment_purposes, purpose]
+                          : prev.investment_purposes.filter((p) => p !== purpose),
+                      }));
+                    }}
+                    className="rounded"
+                  />
+                  <span className="text-sm text-gray-700">{purpose}</span>
+                </label>
+              ))}
+            </div>
           </div>
 
           {/* 想定投資額 */}
