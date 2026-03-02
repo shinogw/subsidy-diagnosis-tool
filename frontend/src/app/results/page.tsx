@@ -24,19 +24,12 @@ interface DiagnosisResult {
 }
 
 function Stars({ count }: { count: number }) {
-  const labels: Record<number, string> = {
-    5: "あなたの条件にピッタリです",
-    4: "あなたの条件に非常に合っています",
-    3: "条件に概ね合っています",
-    2: "一部条件が合いません",
-    1: "条件との適合度が低めです",
-  };
   return (
     <div>
+      <p className="text-xs text-gray-500 mb-0.5">適合度</p>
       <span className="text-yellow-500 text-lg">
         {"★".repeat(count)}{"☆".repeat(5 - count)}
       </span>
-      <p className="text-xs text-gray-500 mt-0.5">適合度: {labels[count] || labels[1]}</p>
     </div>
   );
 }
