@@ -158,6 +158,55 @@ class TestEstimateAmount:
         assert estimate_amount(s, c) == 2000000  # 上限の50%
 
 
+class TestEdgeCases:
+    def test_zero_employees(self):
+        s = make_subsidy(eligible_employee_min=1)
+        c = make_company(employee_count=0)
+        assert hard_filter(s, c) is False
+
+    def test_zero_capital(self):
+        s = make_subsidy(eligible_capital_max=300000000)
+        c = make_company(capital=0)
+        assert hard_filter(s, c) is True  # 0 is within limit
+
+    def test_none_capital(self):
+        s = make_subsidy(eligible_capital_max=300000000)
+        c = make_company(capital=None)
+        assert hard_filter(s, c) is True  # None = unknown, don't filter
+
+    def test_no_investment_purpose(self):
+        s = make_subsidy()
+        c = make_company(investment_purpose=None, investment_amount=None)
+        score, _, _ = calculate_fit_score(s, c)
+        assert score >= 1  # Should not crash
+
+    def test_empty_industries(self):
+        s = make_subsidy(eligible_industries=[])
+        c = make_company()
+        assert hard_filter(s, c) is True  # Empty = no restriction
+
+    def test_no_previous_usage(self):
+        from app.services.matching import score_previous_usage
+        c = make_company(previous_subsidy_usage=None)
+        assert score_previous_usage(c) == 100
+
+    def test_empty_previous_usage(self):
+        from app.services.matching import score_previous_usage
+        c = make_company(previous_subsidy_usage=[])
+        assert score_previous_usage(c) == 100
+
+    def test_estimate_no_max(self):
+        s = make_subsidy(max_amount=None)
+        c = make_company()
+        assert estimate_amount(s, c) is None
+
+    def test_no_established_year(self):
+        from app.services.matching import score_years_fit
+        s = make_subsidy(eligible_years_min=3)
+        c = make_company(established_year=None)
+        assert score_years_fit(s, c) == 50
+
+
 class TestRunMatching:
     def test_filters_and_ranks(self):
         s1 = make_subsidy(name="補助金A", eligible_employee_max=300)
