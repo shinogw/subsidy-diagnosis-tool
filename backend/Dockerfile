@@ -7,8 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN python init_db.py || true
-
 EXPOSE 8000
 ENV PORT=8000
-CMD uvicorn app.main:app --host 0.0.0.0 --port $PORT
+CMD python init_db.py && uvicorn app.main:app --host 0.0.0.0 --port $PORT
