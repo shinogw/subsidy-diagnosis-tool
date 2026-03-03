@@ -98,7 +98,7 @@ export default function SubsidyDetail() {
           </div>
 
           {/* 金額情報 */}
-          <div className="grid grid-cols-3 gap-4 mb-8 p-4 bg-blue-50 rounded-lg">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 p-4 bg-blue-50 rounded-lg">
             <div>
               <span className="text-xs text-gray-500">補助金額</span>
               <p className="text-lg font-bold text-gray-900">

@@ -114,13 +114,14 @@ export default function Home() {
             <label className="block text-sm font-medium text-gray-700 mb-1">従業員数 <span className="text-red-500">*</span></label>
             <input
               type="number" name="employee_count" required min="0"
+              inputMode="numeric" pattern="[0-9]*"
               value={form.employee_count} onChange={handleChange}
               className="w-full border rounded-md px-3 py-2 text-gray-900"
-              placeholder="例: 30"
+              placeholder="半角数字で入力（例: 30）"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* 年間売上 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">年間売上</label>
@@ -141,7 +142,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* 設立年 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">設立年</label>
@@ -164,7 +165,7 @@ export default function Home() {
           {/* 投資目的 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">興味のある分野（複数選択可）</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
                 "AI導入・DX推進",
                 "業務効率化・省力化",

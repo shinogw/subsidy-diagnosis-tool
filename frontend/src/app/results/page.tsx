@@ -165,7 +165,7 @@ export default function Results() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-3 mb-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                         <div>
                           <span className="text-xs text-gray-500">受給目安額</span>
                           <p className="text-xl font-bold text-blue-600">{formatAmount(m.estimated_amount)}</p>
