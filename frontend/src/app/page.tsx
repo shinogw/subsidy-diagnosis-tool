@@ -18,23 +18,40 @@ const PREFECTURES = [
   "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県",
 ];
 
+const REVENUE_OPTIONS = [
+  { label: "選択してください", value: "" },
+  { label: "999万円以下", value: "500" },
+  { label: "1,000〜2,999万円", value: "2000" },
+  { label: "3,000〜4,999万円", value: "4000" },
+  { label: "5,000〜9,999万円", value: "7500" },
+  { label: "1億円以上", value: "15000" },
+];
+
+const YEAR_OPTIONS = (() => {
+  const years = [{ label: "選択してください", value: "" }];
+  for (let y = 2026; y >= 1950; y--) {
+    years.push({ label: `${y}年`, value: String(y) });
+  }
+  return years;
+})();
+
 export default function Home() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    company_name: "",
-    industry: "情報通信業",
+    industry: "",
     employee_count: "",
     annual_revenue: "",
     capital: "",
     established_year: "",
-    prefecture: "東京都",
+    prefecture: "",
     has_wage_increase_plan: false,
     has_gbiz_id: false,
     investment_purposes: [] as string[],
+    interested_in_startup_loan: false,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setForm((prev) => ({
       ...prev,
@@ -48,6 +65,7 @@ export default function Home() {
 
     const payload = {
       ...form,
+      company_name: "（LINE登録後に取得）",
       employee_count: parseInt(form.employee_count) || 0,
       annual_revenue: form.annual_revenue ? parseInt(form.annual_revenue) * 10000 : null,
       capital: form.capital ? parseInt(form.capital) * 10000 : null,
@@ -63,11 +81,10 @@ export default function Home() {
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      // Store in sessionStorage for results page
       sessionStorage.setItem("diagnosisResult", JSON.stringify(data));
       router.push("/results");
     } catch (err) {
-      alert("エラーが発生しました。バックエンドが起動しているか確認してください。");
+      alert("エラーが発生しました。しばらくしてからお試しください。");
     } finally {
       setLoading(false);
     }
@@ -76,37 +93,27 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-2">補助金診断ツール</h1>
+        <h1 className="text-3xl font-bold text-center mb-2">補助金AI</h1>
         <p className="text-gray-500 text-center mb-8">
-          企業情報を入力して、該当する補助金を診断します
+          30秒で診断。あなたの会社が使える補助金がわかります
         </p>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-8 space-y-6">
-          {/* 会社名 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">会社名</label>
-            <input
-              type="text" name="company_name" required
-              value={form.company_name} onChange={handleChange}
-              className="w-full border rounded-md px-3 py-2 text-gray-900"
-              placeholder="例: 株式会社サンプル"
-            />
-          </div>
-
           {/* 業種 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">業種</label>
-            <select name="industry" value={form.industry} onChange={handleChange}
+            <label className="block text-sm font-medium text-gray-700 mb-1">業種 <span className="text-red-500">*</span></label>
+            <select name="industry" value={form.industry} onChange={handleChange} required
               className="w-full border rounded-md px-3 py-2 text-gray-900">
+              <option value="">選択してください</option>
               {INDUSTRIES.map((i) => <option key={i} value={i}>{i}</option>)}
             </select>
           </div>
 
           {/* 従業員数 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">従業員数</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">従業員数 <span className="text-red-500">*</span></label>
             <input
-              type="number" name="employee_count" required min="1"
+              type="number" name="employee_count" required min="0"
               value={form.employee_count} onChange={handleChange}
               className="w-full border rounded-md px-3 py-2 text-gray-900"
               placeholder="例: 30"
@@ -116,13 +123,11 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-4">
             {/* 年間売上 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">年間売上（万円）</label>
-              <input
-                type="number" name="annual_revenue"
-                value={form.annual_revenue} onChange={handleChange}
-                className="w-full border rounded-md px-3 py-2 text-gray-900"
-                placeholder="例: 10000"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">年間売上</label>
+              <select name="annual_revenue" value={form.annual_revenue} onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2 text-gray-900">
+                {REVENUE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
             </div>
             {/* 資本金 */}
             <div>
@@ -140,18 +145,17 @@ export default function Home() {
             {/* 設立年 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">設立年</label>
-              <input
-                type="number" name="established_year" min="1900" max="2026"
-                value={form.established_year} onChange={handleChange}
-                className="w-full border rounded-md px-3 py-2 text-gray-900"
-                placeholder="例: 2018"
-              />
+              <select name="established_year" value={form.established_year} onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2 text-gray-900">
+                {YEAR_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
             </div>
             {/* 所在地 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">所在地</label>
-              <select name="prefecture" value={form.prefecture} onChange={handleChange}
+              <label className="block text-sm font-medium text-gray-700 mb-1">所在地 <span className="text-red-500">*</span></label>
+              <select name="prefecture" value={form.prefecture} onChange={handleChange} required
                 className="w-full border rounded-md px-3 py-2 text-gray-900">
+                <option value="">選択してください</option>
                 {PREFECTURES.map((p) => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
@@ -159,7 +163,7 @@ export default function Home() {
 
           {/* 投資目的 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">投資目的・導入したいもの（複数選択可）</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">興味のある分野（複数選択可）</label>
             <div className="grid grid-cols-2 gap-2">
               {[
                 "AI導入・DX推進",
@@ -193,7 +197,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* チェックボックス */}
+          {/* その他オプション */}
           <div className="space-y-3">
             <label className="flex items-center gap-2">
               <input type="checkbox" name="has_wage_increase_plan"
@@ -207,13 +211,19 @@ export default function Home() {
                 className="rounded" />
               <span className="text-sm text-gray-700">GビズIDを持っている</span>
             </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" name="interested_in_startup_loan"
+                checked={form.interested_in_startup_loan} onChange={handleChange}
+                className="rounded" />
+              <span className="text-sm text-gray-700">創業融資にも興味がある</span>
+            </label>
           </div>
 
           <button
             type="submit" disabled={loading}
             className="w-full bg-blue-600 text-white py-3 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? "診断中..." : "補助金を診断する"}
+            {loading ? "診断中..." : "無料で診断する（30秒）"}
           </button>
         </form>
       </div>

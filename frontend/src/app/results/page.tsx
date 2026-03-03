@@ -17,6 +17,17 @@ interface MatchResult {
   max_amount: number | null;
 }
 
+const PAYMENT_TIMELINE: Record<string, string> = {
+  "省力化": "採択後 約6〜8ヶ月",
+  "IT導入": "採択後 約4〜6ヶ月",
+  "ものづくり": "採択後 約6〜8ヶ月",
+  "小規模": "採択後 約4〜6ヶ月",
+  "事業承継": "採択後 約4〜6ヶ月",
+  "新事業": "採択後 約6〜10ヶ月",
+  "業務改善": "採択後 約3〜5ヶ月",
+  "人材": "支給決定後 約2〜4ヶ月",
+};
+
 interface DiagnosisResult {
   company_id: string;
   total_matches: number;
@@ -122,7 +133,7 @@ export default function Results() {
                 rel="noopener noreferrer"
                 className="block w-full bg-[#06C755] text-white py-4 rounded-lg font-bold text-lg hover:bg-[#05b34c] transition-colors text-center"
               >
-                LINE@から一括申請する
+                LINEで相談する
               </a>
               <p className="text-xs text-gray-400 text-center mt-2">提携行政書士が申請をサポートします</p>
             </div>
@@ -154,7 +165,7 @@ export default function Results() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 mb-3">
+                      <div className="grid grid-cols-3 gap-3 mb-3">
                         <div>
                           <span className="text-xs text-gray-500">受給目安額</span>
                           <p className="text-xl font-bold text-blue-600">{formatAmount(m.estimated_amount)}</p>
@@ -162,6 +173,10 @@ export default function Results() {
                         <div>
                           <span className="text-xs text-gray-500">補助上限</span>
                           <p className="text-lg text-gray-700">{formatAmount(m.max_amount)}</p>
+                        </div>
+                        <div>
+                          <span className="text-xs text-gray-500">入金までの目安</span>
+                          <p className="text-sm text-gray-700">{PAYMENT_TIMELINE[m.category] || "採択後 約4〜8ヶ月"}</p>
                         </div>
                       </div>
 

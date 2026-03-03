@@ -181,7 +181,7 @@ export default function SubsidyDetail() {
               rel="noopener noreferrer"
               className="inline-block bg-[#06C755] text-white px-8 py-3 rounded-md font-medium hover:bg-[#05b34c]"
             >
-              LINE@から申請する
+              LINEで相談する
             </a>
             <p className="text-xs text-gray-400 mt-2">提携行政書士が申請をサポートします</p>
           </div>
