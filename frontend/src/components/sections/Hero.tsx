@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import CTAButton from "@/components/ui/CTAButton";
+import { ShieldCheck, CheckCircle, Timer } from "lucide-react";
 
 export default function Hero() {
   return (
@@ -21,13 +22,16 @@ export default function Hero() {
             >
               <div className="flex flex-wrap gap-2 mb-6">
                 <span className="inline-flex items-center gap-1.5 bg-[#E6F4ED] text-[#2E7D5B] text-[13px] font-medium px-3.5 py-1.5 rounded-full">
-                  🏛️ 行政書士監修
+                  <ShieldCheck className="w-3.5 h-3.5" strokeWidth={2} />
+                  行政書士監修
                 </span>
                 <span className="inline-flex items-center gap-1.5 bg-[#E8EDF3] text-[#1B3A5C] text-[13px] font-medium px-3.5 py-1.5 rounded-full">
-                  ✅ 完全無料
+                  <CheckCircle className="w-3.5 h-3.5" strokeWidth={2} />
+                  完全無料
                 </span>
                 <span className="inline-flex items-center gap-1.5 bg-[#FEF3C7] text-[#92400E] text-[13px] font-medium px-3.5 py-1.5 rounded-full">
-                  ⏱ 約1分で完了
+                  <Timer className="w-3.5 h-3.5" strokeWidth={2} />
+                  約1分で完了
                 </span>
               </div>
             </motion.div>
@@ -86,7 +90,7 @@ export default function Hero() {
                 {/* 診断結果モック */}
                 <div className="space-y-3 px-1">
                   <div className="text-center mb-5">
-                    <span className="text-2xl mb-1 block">🎯</span>
+                    <p className="text-[11px] text-[#6B7280] mb-1">診断結果</p>
                     <p className="text-[#1B3A5C] font-bold text-[17px] leading-tight">
                       3件の補助金が<br />見つかりました
                     </p>

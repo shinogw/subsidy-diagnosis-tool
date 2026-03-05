@@ -2,10 +2,12 @@
 
 import FadeIn from "@/components/ui/FadeIn";
 import CTAButton from "@/components/ui/CTAButton";
+import { ShieldCheck, Lock, Coins } from "lucide-react";
 
 const points = [
   {
-    icon: "🏛️",
+    Icon: ShieldCheck,
+    iconColor: "text-[#1B3A5C]",
     bgColor: "bg-[#E8EDF3]",
     title: "行政書士が監修",
     desc: "国家資格を持つ行政書士と提携。診断ロジックから申請サポートまで専門家が関わっています",
@@ -13,7 +15,8 @@ const points = [
     badgeColor: "bg-[#E8EDF3] text-[#1B3A5C]",
   },
   {
-    icon: "🔒",
+    Icon: Lock,
+    iconColor: "text-[#2E7D5B]",
     bgColor: "bg-[#E6F4ED]",
     title: "個人情報の入力不要",
     desc: "診断に名前・電話番号・メールアドレスは一切不要。安心してお試しいただけます",
@@ -21,7 +24,8 @@ const points = [
     badgeColor: "bg-[#E6F4ED] text-[#2E7D5B]",
   },
   {
-    icon: "¥0",
+    Icon: Coins,
+    iconColor: "text-[#92400E]",
     bgColor: "bg-[#FEF3C7]",
     title: "完全無料で何度でも",
     desc: "診断は何度でも無料です。費用が発生するのは申請サポートをご依頼いただいた場合のみです",
@@ -49,9 +53,8 @@ export default function WhyTrust() {
                 <span className={`absolute top-4 right-4 text-[11px] font-bold px-2.5 py-1 rounded-full ${item.badgeColor}`}>
                   {item.badge}
                 </span>
-                {/* アイコン */}
-                <div className={`w-14 h-14 ${item.bgColor} rounded-2xl flex items-center justify-center text-2xl mb-5`}>
-                  {item.icon}
+                <div className={`w-12 h-12 ${item.bgColor} rounded-xl flex items-center justify-center mb-4`}>
+                  <item.Icon className={`w-6 h-6 ${item.iconColor}`} strokeWidth={1.5} />
                 </div>
                 <h3 className="font-bold text-[17px] text-[#1B3A5C] mb-3">{item.title}</h3>
                 <p className="text-[14px] text-[#6B7280] leading-[1.8]">{item.desc}</p>
