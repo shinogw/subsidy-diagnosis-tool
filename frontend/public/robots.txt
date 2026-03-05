@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://subsidy-diagnosis-app-production.up.railway.app/sitemap.xml

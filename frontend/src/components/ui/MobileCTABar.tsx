@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { trackEvent } from "@/components/ui/Analytics";
 
 export default function MobileCTABar() {
   const [show, setShow] = useState(false);
@@ -31,6 +32,7 @@ export default function MobileCTABar() {
             </p>
             <Link
               href="/diagnosis"
+              onClick={() => trackEvent("cta_click", { location: "mobile_bar" })}
               className="bg-[#E8772E] text-white text-[15px] font-bold px-6 py-3 rounded-lg hover:bg-[#D06A28] transition-colors shrink-0"
             >
               無料で診断する

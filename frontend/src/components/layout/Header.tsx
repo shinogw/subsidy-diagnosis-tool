@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { trackEvent } from "@/components/ui/Analytics";
 
 export default function Header() {
   return (
@@ -11,6 +12,7 @@ export default function Header() {
         </Link>
         <Link
           href="/diagnosis"
+          onClick={() => trackEvent("cta_click", { location: "header" })}
           className="bg-[#E8772E] text-white text-sm font-bold px-6 py-2.5 rounded-lg hover:bg-[#D06A28] transition-colors"
         >
           無料で診断する

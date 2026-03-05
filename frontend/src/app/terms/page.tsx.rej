@@ -1,0 +1,61 @@
+diff a/frontend/src/app/terms/page.tsx b/frontend/src/app/terms/page.tsx	(rejected hunks)
+@@ -1,42 +1,42 @@
+-"use client";
+-
+ import Link from "next/link";
+ 
+ export default function Terms() {
+   return (
+-    <main className="min-h-screen bg-white py-16 px-4">
+-      <div className="max-w-3xl mx-auto">
+-        <Link href="/" className="text-blue-600 text-sm hover:underline mb-8 block">← トップに戻る</Link>
+-        <h1 className="text-3xl font-bold text-gray-900 mb-8">利用規約</h1>
+-
+-        <div className="prose prose-gray max-w-none text-sm leading-relaxed space-y-6">
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">第1条（サービス内容）</h2>
+-          <p>補助金AI（以下「本サービス」）は、中小企業・個人事業主を対象とした補助金診断サービスを提供します。本サービスの診断結果は参考情報であり、補助金の採択を保証するものではありません。</p>
+-
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">第2条（診断料金）</h2>
++    <main className="min-h-screen bg-[#FAFBFC] py-16 px-4">
++      <div className="max-w-[720px] mx-auto">
++        <Link href="/" className="text-[14px] text-[#6B7280] hover:text-[#1B3A5C] transition-colors mb-8 block">
++          ← トップに戻る
++        </Link>
++        <h1 className="text-[28px] font-bold text-[#1B3A5C] mb-8">利用規約</h1>
++
++        <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 sm:p-8 space-y-6 text-[15px] text-[#2D2D2D] leading-[1.8]">
++          <h2 className="text-[17px] font-bold text-[#1B3A5C]">第1条（サービス内容）</h2>
++          <p>補助金診断（以下「本サービス」）は、中小企業・個人事業主を対象とした補助金診断サービスを提供します。本サービスの診断結果は参考情報であり、補助金の採択を保証するものではありません。</p>
++
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">第2条（診断料金）</h2>
+           <p>本サービスの診断機能は無料でご利用いただけます。行政書士による申請サポートをご利用の場合は、別途費用が発生します。</p>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">第3条（行政書士による申請サポート）</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">第3条（行政書士による申請サポート）</h2>
+           <p>補助金の申請書類作成・申請代行は、提携行政書士が行います。申請サポートに関する契約は、ユーザーと提携行政書士の間で直接締結されます。</p>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">第4条（免責事項）</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">第4条（免責事項）</h2>
+           <ul className="list-disc pl-6 space-y-1">
+             <li>本サービスの診断結果は参考情報であり、正確性・完全性を保証するものではありません</li>
+             <li>補助金の採択・不採択について、本サービスは一切の責任を負いません</li>
+             <li>補助金制度の変更により、診断結果と実際の条件が異なる場合があります</li>
+           </ul>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">第5条（禁止事項）</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">第5条（禁止事項）</h2>
+           <ul className="list-disc pl-6 space-y-1">
+             <li>虚偽の情報を入力する行為</li>
+             <li>本サービスの運営を妨害する行為</li>
+             <li>その他、法令に違反する行為</li>
+           </ul>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">第6条（規約の変更）</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">第6条（規約の変更）</h2>
+           <p>本規約は予告なく変更される場合があります。変更後の規約は、本ページに掲載した時点で効力を生じます。</p>
+ 
+-          <p className="text-gray-400 mt-8">制定日: 2026年3月4日</p>
++          <p className="text-[#6B7280] text-[13px] pt-4">制定日: 2026年3月4日</p>
+         </div>
+       </div>
+     </main>

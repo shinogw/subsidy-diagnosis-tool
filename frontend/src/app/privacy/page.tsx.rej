@@ -1,0 +1,68 @@
+diff a/frontend/src/app/privacy/page.tsx b/frontend/src/app/privacy/page.tsx	(rejected hunks)
+@@ -1,47 +1,47 @@
+-"use client";
+-
+ import Link from "next/link";
+ 
+ export default function Privacy() {
+   return (
+-    <main className="min-h-screen bg-white py-16 px-4">
+-      <div className="max-w-3xl mx-auto">
+-        <Link href="/" className="text-blue-600 text-sm hover:underline mb-8 block">← トップに戻る</Link>
+-        <h1 className="text-3xl font-bold text-gray-900 mb-8">プライバシーポリシー</h1>
++    <main className="min-h-screen bg-[#FAFBFC] py-16 px-4">
++      <div className="max-w-[720px] mx-auto">
++        <Link href="/" className="text-[14px] text-[#6B7280] hover:text-[#1B3A5C] transition-colors mb-8 block">
++          ← トップに戻る
++        </Link>
++        <h1 className="text-[28px] font-bold text-[#1B3A5C] mb-8">プライバシーポリシー</h1>
+ 
+-        <div className="prose prose-gray max-w-none text-sm leading-relaxed space-y-6">
+-          <p>補助金AI（以下「本サービス」）は、ユーザーの個人情報の重要性を認識し、以下のとおりプライバシーポリシーを定めます。</p>
++        <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 sm:p-8 space-y-6 text-[15px] text-[#2D2D2D] leading-[1.8]">
++          <p>補助金診断（以下「本サービス」）は、ユーザーの個人情報の重要性を認識し、以下のとおりプライバシーポリシーを定めます。</p>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">1. 収集する情報</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">1. 収集する情報</h2>
+           <p>本サービスでは、診断に必要な以下の情報を収集します：</p>
+           <ul className="list-disc pl-6 space-y-1">
+-            <li>業種、従業員数、設立年、年間売上等の企業情報</li>
+-            <li>投資目的に関する選択情報</li>
+-            <li>LINE@登録時に提供される情報</li>
++            <li>業種、従業員数、年間売上等の企業情報</li>
++            <li>興味のある分野に関する選択情報</li>
++            <li>LINE登録時に提供される情報</li>
+           </ul>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">2. 情報の利用目的</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">2. 情報の利用目的</h2>
+           <ul className="list-disc pl-6 space-y-1">
+-            <li>補助金の診断・マッチングサービスの提供</li>
++            <li>補助金の診断サービスの提供</li>
+             <li>提携行政書士への適切な引き継ぎ</li>
+             <li>サービスの改善・開発</li>
+             <li>お問い合わせへの対応</li>
+           </ul>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">3. 第三者提供</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">3. 第三者提供</h2>
+           <p>ユーザーの同意なく個人情報を第三者に提供することはありません。ただし、以下の場合を除きます：</p>
+           <ul className="list-disc pl-6 space-y-1">
+             <li>ユーザーが申請サポートを希望し、提携行政書士への引き継ぎに同意した場合</li>
+             <li>法令に基づく場合</li>
+           </ul>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">4. 安全管理</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">4. 安全管理</h2>
+           <p>SSL/TLS暗号化通信を使用し、個人情報の漏洩・滅失・毀損を防止するため、適切な安全管理措置を講じます。</p>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">5. お問い合わせ</h2>
+-          <p>個人情報の取扱いに関するお問い合わせは、LINE@よりご連絡ください。</p>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">5. お問い合わせ</h2>
++          <p>個人情報の取扱いに関するお問い合わせは、LINEよりご連絡ください。</p>
+ 
+-          <p className="text-gray-400 mt-8">制定日: 2026年3月4日</p>
++          <p className="text-[#6B7280] text-[13px] pt-4">制定日: 2026年3月4日</p>
+         </div>
+       </div>
+     </main>
