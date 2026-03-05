@@ -53,7 +53,7 @@ export default function Hero() {
               transition={{ duration: 0.5, delay: 0.5 }}
               className="flex flex-col sm:flex-row items-start gap-4"
             >
-              <CTAButton label="無料で診断する" shimmer size="large" />
+              <CTAButton label="無料で診断する" shimmer size="large" location="hero" />
               <p className="text-xs text-[#6B7280] mt-2 sm:mt-4">
                 ※ 登録不要・完全無料・営業電話なし
               </p>

@@ -18,7 +18,7 @@ export default function CTASection() {
             <br />
             個人情報の入力は不要です。
           </p>
-          <CTAButton label="無料で診断する" size="large" />
+          <CTAButton label="無料で診断する" size="large" location="footer_cta" />
           <p className="text-xs text-[#6B7280] mt-5">
             ※ 登録不要・完全無料・営業電話なし
           </p>

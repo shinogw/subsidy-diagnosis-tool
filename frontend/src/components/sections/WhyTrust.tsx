@@ -52,7 +52,7 @@ export default function WhyTrust() {
         </div>
         <FadeIn>
           <div className="text-center">
-            <CTAButton label="無料で診断する" />
+            <CTAButton label="無料で診断する" location="trust" />
           </div>
         </FadeIn>
       </div>

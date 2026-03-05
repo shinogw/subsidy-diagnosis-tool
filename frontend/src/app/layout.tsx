@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP, Inter } from "next/font/google";
+import Analytics from "@/components/ui/Analytics";
 import "./globals.css";
 
 const notoSansJP = Noto_Sans_JP({
@@ -38,7 +39,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className={`${notoSansJP.variable} ${inter.variable}`}>
-      <body className="font-[family-name:var(--font-noto)]">{children}</body>
+      <body className="font-[family-name:var(--font-noto)]">
+        <Analytics />
+        {children}
+      </body>
     </html>
   );
 }
