@@ -1,6 +1,7 @@
 "use client";
 
 import FadeIn from "@/components/ui/FadeIn";
+import { trackEvent } from "@/components/ui/Analytics";
 
 const faqs = [
   {
@@ -37,7 +38,7 @@ export default function FAQ() {
         <div className="space-y-3">
           {faqs.map((item, i) => (
             <FadeIn key={i} delay={i * 0.05}>
-              <details className="group bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
+              <details className="group bg-white rounded-xl border border-[#E5E7EB] overflow-hidden" onClick={() => trackEvent("faq_open", { question_id: `q${i + 1}` })}>
                 <summary className="flex items-center justify-between p-5 sm:p-6 cursor-pointer hover:bg-[#FAFBFC] transition-colors">
                   <span className="font-medium text-[#2D2D2D] text-[16px] pr-4">{item.q}</span>
                   <span className="text-[#6B7280] group-open:rotate-180 transition-transform duration-300 shrink-0">
