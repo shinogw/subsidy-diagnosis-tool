@@ -82,8 +82,8 @@ function DeadlineTag({ category }: { category: string }) {
 function formatAmount(amount: number | null): string {
   if (!amount) return "—";
   if (amount >= 100000000) return `${(amount / 100000000).toFixed(1)}億円`;
-  if (amount >= 10000) return `${(amount / 10000).toFixed(0)}万円`;
-  return `${amount}円`;
+  if (amount >= 10000) return `${Math.floor(amount / 10000).toLocaleString()}万円`;
+  return `${amount.toLocaleString()}円`;
 }
 
 const BLUR_THRESHOLD = 2; // Show first 2 cards, blur the rest
