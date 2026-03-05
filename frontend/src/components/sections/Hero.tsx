@@ -19,10 +19,17 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <span className="inline-flex items-center gap-1.5 bg-[#E6F4ED] text-[#2E7D5B] text-sm font-medium px-4 py-1.5 rounded-full mb-6">
-                <span>🏛️</span>
-                行政書士監修・完全無料
-              </span>
+              <div className="flex flex-wrap gap-2 mb-6">
+                <span className="inline-flex items-center gap-1.5 bg-[#E6F4ED] text-[#2E7D5B] text-[13px] font-medium px-3.5 py-1.5 rounded-full">
+                  🏛️ 行政書士監修
+                </span>
+                <span className="inline-flex items-center gap-1.5 bg-[#E8EDF3] text-[#1B3A5C] text-[13px] font-medium px-3.5 py-1.5 rounded-full">
+                  ✅ 完全無料
+                </span>
+                <span className="inline-flex items-center gap-1.5 bg-[#FEF3C7] text-[#92400E] text-[13px] font-medium px-3.5 py-1.5 rounded-full">
+                  ⏱ 約1分で完了
+                </span>
+              </div>
             </motion.div>
 
             <motion.h1
@@ -73,42 +80,50 @@ export default function Hero() {
               className="relative"
             >
               {/* スマホフレーム */}
-              <div className="w-[280px] bg-white rounded-[32px] shadow-2xl border border-[#E5E7EB] p-4 rotate-[-2deg]">
-                {/* ステータスバー */}
-                <div className="w-20 h-1 bg-[#E5E7EB] rounded-full mx-auto mb-4" />
+              <div className="w-[300px] bg-white rounded-[36px] shadow-[0_20px_60px_rgba(27,58,92,0.15)] border border-[#E5E7EB]/50 p-5 rotate-[-3deg]">
+                {/* ノッチ */}
+                <div className="w-24 h-1.5 bg-[#E5E7EB] rounded-full mx-auto mb-5" />
                 {/* 診断結果モック */}
-                <div className="space-y-3 px-2">
-                  <div className="text-center mb-4">
-                    <p className="text-xs text-[#6B7280]">診断結果</p>
-                    <p className="text-[#1B3A5C] font-bold text-lg">3件の補助金が見つかりました</p>
+                <div className="space-y-3 px-1">
+                  <div className="text-center mb-5">
+                    <span className="text-2xl mb-1 block">🎯</span>
+                    <p className="text-[#1B3A5C] font-bold text-[17px] leading-tight">
+                      3件の補助金が<br />見つかりました
+                    </p>
                   </div>
                   {/* カード1 */}
-                  <div className="bg-[#E8EDF3] rounded-xl p-3">
-                    <p className="text-xs font-bold text-[#1B3A5C]">ものづくり補助金</p>
-                    <div className="flex justify-between items-center mt-1">
-                      <p className="text-xs text-[#6B7280]">最大1,250万円</p>
-                      <span className="text-[10px] bg-[#E6F4ED] text-[#2E7D5B] px-2 py-0.5 rounded-full font-medium">適合度 ★★★</span>
+                  <div className="bg-gradient-to-r from-[#E8EDF3] to-[#F0F4F8] rounded-xl p-4 border border-[#E5E7EB]/50">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-[13px] font-bold text-[#1B3A5C]">ものづくり補助金</p>
+                        <p className="text-[12px] text-[#6B7280] mt-0.5">最大 <span className="font-bold text-[#1B3A5C]">1,250万円</span></p>
+                      </div>
+                      <span className="text-[10px] bg-[#2E7D5B] text-white px-2.5 py-1 rounded-full font-bold">★★★</span>
                     </div>
                   </div>
                   {/* カード2 */}
-                  <div className="bg-[#E8EDF3] rounded-xl p-3">
-                    <p className="text-xs font-bold text-[#1B3A5C]">IT導入補助金</p>
-                    <div className="flex justify-between items-center mt-1">
-                      <p className="text-xs text-[#6B7280]">最大450万円</p>
-                      <span className="text-[10px] bg-[#E6F4ED] text-[#2E7D5B] px-2 py-0.5 rounded-full font-medium">適合度 ★★★</span>
+                  <div className="bg-gradient-to-r from-[#E8EDF3] to-[#F0F4F8] rounded-xl p-4 border border-[#E5E7EB]/50">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-[13px] font-bold text-[#1B3A5C]">IT導入補助金</p>
+                        <p className="text-[12px] text-[#6B7280] mt-0.5">最大 <span className="font-bold text-[#1B3A5C]">450万円</span></p>
+                      </div>
+                      <span className="text-[10px] bg-[#2E7D5B] text-white px-2.5 py-1 rounded-full font-bold">★★★</span>
                     </div>
                   </div>
                   {/* カード3 */}
-                  <div className="bg-[#E8EDF3] rounded-xl p-3">
-                    <p className="text-xs font-bold text-[#1B3A5C]">小規模事業者持続化補助金</p>
-                    <div className="flex justify-between items-center mt-1">
-                      <p className="text-xs text-[#6B7280]">最大200万円</p>
-                      <span className="text-[10px] bg-[#E6F4ED] text-[#2E7D5B] px-2 py-0.5 rounded-full font-medium">適合度 ★★☆</span>
+                  <div className="bg-gradient-to-r from-[#E8EDF3] to-[#F0F4F8] rounded-xl p-4 border border-[#E5E7EB]/50">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-[13px] font-bold text-[#1B3A5C]">持続化補助金</p>
+                        <p className="text-[12px] text-[#6B7280] mt-0.5">最大 <span className="font-bold text-[#1B3A5C]">200万円</span></p>
+                      </div>
+                      <span className="text-[10px] bg-[#E8772E] text-white px-2.5 py-1 rounded-full font-bold">★★☆</span>
                     </div>
                   </div>
                 </div>
                 {/* ホームインジケータ */}
-                <div className="w-24 h-1 bg-[#E5E7EB] rounded-full mx-auto mt-4" />
+                <div className="w-28 h-1.5 bg-[#E5E7EB] rounded-full mx-auto mt-5" />
               </div>
             </motion.div>
           </motion.div>

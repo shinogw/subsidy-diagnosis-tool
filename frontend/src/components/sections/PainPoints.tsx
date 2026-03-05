@@ -5,18 +5,21 @@ import FadeIn from "@/components/ui/FadeIn";
 const pains = [
   {
     icon: "📋",
+    bgColor: "bg-[#E8EDF3]",
     title: "種類が多すぎて分からない",
-    desc: "補助金は3,000種類以上。自分の会社にどれが該当するか調べる時間がない",
+    desc: "補助金は3,000種類以上。自分の会社に合うものを調べる時間も余裕もない",
   },
   {
     icon: "⏰",
-    title: "申請が面倒で断念した",
-    desc: "書類作成が複雑で、本業に追われて手が回らない。過去に諦めた経験がある",
+    bgColor: "bg-[#FEF3C7]",
+    title: "調べたけど挫折した",
+    desc: "申請書類が複雑で、本業に追われて手が回らない。途中で諦めた経験がある",
   },
   {
     icon: "💰",
+    bgColor: "bg-[#E6F4ED]",
     title: "いくらもらえるか見えない",
-    desc: "補助金の存在は知っていても、自社でいくら受給できるか分からず動けない",
+    desc: "補助金の存在は知っていても、自社がいくら受給できるのか分からず動けない",
   },
 ];
 
@@ -32,13 +35,17 @@ export default function PainPoints() {
             中小企業の約70%が、使える補助金を見逃しています
           </p>
         </FadeIn>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {pains.map((item, i) => (
             <FadeIn key={item.title} delay={i * 0.1}>
-              <div className="bg-white rounded-xl p-8 border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-200 text-center h-full">
-                <span className="text-4xl mb-5 block">{item.icon}</span>
-                <h3 className="font-bold text-[18px] text-[#2D2D2D] mb-3">{item.title}</h3>
-                <p className="text-[15px] text-[#6B7280] leading-[1.8]">{item.desc}</p>
+              <div className="bg-white rounded-xl p-6 border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 h-full">
+                {/* アイコン */}
+                <div className={`w-14 h-14 ${item.bgColor} rounded-2xl flex items-center justify-center text-2xl mb-5`}>
+                  {item.icon}
+                </div>
+                {/* テキスト（左揃え） */}
+                <h3 className="font-bold text-[17px] text-[#1B3A5C] mb-3 leading-[1.4]">{item.title}</h3>
+                <p className="text-[14px] text-[#6B7280] leading-[1.8]">{item.desc}</p>
               </div>
             </FadeIn>
           ))}
