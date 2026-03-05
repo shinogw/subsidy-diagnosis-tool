@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import confetti from "canvas-confetti";
+import { trackEvent } from "@/components/ui/Analytics";
 
 interface MatchResult {
   subsidy_id: string;
