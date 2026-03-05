@@ -184,7 +184,7 @@ export default function SubsidyDetailPage() {
               onClick={() => trackEvent("line_register_click", { from: "subsidy_detail", subsidy_id: params.id as string })}
               className="inline-block bg-[#06C755] text-white font-bold text-[16px] px-8 py-3.5 rounded-xl hover:bg-[#05b34c] transition-colors"
             >
-              LINEで相談する
+              LINEで申請に必要な情報を受け取る
             </a>
             <p className="text-[12px] text-[#6B7280] mt-3">提携行政書士が申請をサポートします</p>
           </div>

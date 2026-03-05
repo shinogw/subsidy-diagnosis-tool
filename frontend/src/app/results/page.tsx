@@ -189,7 +189,7 @@ export default function Results() {
                           <p className="text-gray-700 font-medium mb-2">残り{result.matches.length - BLUR_THRESHOLD}件の補助金があります</p>
                           <button onClick={() => setShowAll(true)}
                             className="bg-[#06C755] text-white px-6 py-2 rounded-full font-medium hover:bg-[#05b34c] text-sm">
-                            LINEで全ての結果を確認する
+                            LINEで申請に必要な情報を受け取る
                           </button>
                         </div>
                       </div>
@@ -272,7 +272,7 @@ export default function Results() {
               onClick={(e) => selectedMatches.length === 0 && e.preventDefault()}
             >
               {selectedMatches.length > 0
-                ? `選択した${selectedMatches.length}件についてLINEで相談する`
+                ? `選択した${selectedMatches.length}件の申請に必要な情報をLINEで受け取る`
                 : "補助金を選択してください"
               }
             </a>
