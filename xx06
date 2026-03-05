@@ -1,0 +1,1222 @@
+From 28d3efa969597b01828bb359d2d723b6a438d83e Mon Sep 17 00:00:00 2001
+From: R S <rs@arunoMac-mini.local>
+Date: Thu, 5 Mar 2026 17:37:07 +0800
+Subject: [PATCH 07/12] =?UTF-8?q?=E8=A8=BA=E6=96=AD=E3=83=9A=E3=83=BC?=
+ =?UTF-8?q?=E3=82=B8+=E7=B5=90=E6=9E=9C=E3=83=9A=E3=83=BC=E3=82=B8=20?=
+ =?UTF-8?q?=E3=83=AA=E3=83=95=E3=82=A1=E3=82=AF=E3=82=BF=EF=BC=88=E8=A6=8F?=
+ =?UTF-8?q?=E7=B4=84v2.0=E9=81=A9=E7=94=A8=EF=BC=89?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- 診断: 3ステップ10問 → 5問に削減、カード型選択UI
+- 診断: API失敗時ダミーデータでデモ動作
+- 結果: confetti削除、カラー統一、落ち着いたトーン
+- 結果: LINE登録CTA追加
+- 全ページGA4イベント計測
+---
+ frontend/src/app/diagnosis/page.tsx | 614 +++++++++++++++-------------
+ frontend/src/app/results/page.tsx   | 398 +++++++-----------
+ 2 files changed, 462 insertions(+), 550 deletions(-)
+
+diff --git a/frontend/src/app/diagnosis/page.tsx b/frontend/src/app/diagnosis/page.tsx
+index 5d01365..437c6e7 100644
+--- a/frontend/src/app/diagnosis/page.tsx
++++ b/frontend/src/app/diagnosis/page.tsx
+@@ -3,109 +3,164 @@
+ import { useState, useEffect } from "react";
+ import { useRouter } from "next/navigation";
+ import { motion, AnimatePresence } from "framer-motion";
++import { trackEvent } from "@/components/ui/Analytics";
+ 
+-const INDUSTRIES = [
+-  "情報通信業", "製造業", "建設業", "卸売業・小売業", "サービス業",
+-  "飲食業", "医療・福祉", "不動産業", "運輸業", "農林水産業", "その他",
+-];
+-
+-const PREFECTURES = [
+-  "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県",
+-  "茨城県", "栃木県", "群馬県", "埼玉県", "千葉県", "東京都", "神奈川県",
+-  "新潟県", "富山県", "石川県", "福井県", "山梨県", "長野県", "岐阜県",
+-  "静岡県", "愛知県", "三重県", "滋賀県", "京都府", "大阪府", "兵庫県",
+-  "奈良県", "和歌山県", "鳥取県", "島根県", "岡山県", "広島県", "山口県",
+-  "徳島県", "香川県", "愛媛県", "高知県", "福岡県", "佐賀県", "長崎県",
+-  "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県",
+-];
++// --- 質問データ（5問に絞る）---
+ 
+-const REVENUE_OPTIONS = [
+-  { label: "選択してください", value: "" },
+-  { label: "999万円以下", value: "500" },
+-  { label: "1,000〜2,999万円", value: "2000" },
+-  { label: "3,000〜4,999万円", value: "4000" },
+-  { label: "5,000〜9,999万円", value: "7500" },
+-  { label: "1億円以上", value: "15000" },
++const QUESTIONS = [
++  {
++    id: "industry",
++    label: "業種を教えてください",
++    type: "card" as const,
++    options: [
++      { value: "製造業", label: "製造業" },
++      { value: "情報通信業", label: "情報通信業" },
++      { value: "建設業", label: "建設業" },
++      { value: "卸売業・小売業", label: "卸売・小売業" },
++      { value: "サービス業", label: "サービス業" },
++      { value: "飲食業", label: "飲食業" },
++      { value: "医療・福祉", label: "医療・福祉" },
++      { value: "不動産業", label: "不動産業" },
++      { value: "運輸業", label: "運輸業" },
++      { value: "その他", label: "その他" },
++    ],
++  },
++  {
++    id: "employee_count",
++    label: "従業員数を教えてください",
++    type: "card" as const,
++    options: [
++      { value: "1-5", label: "1〜5名" },
++      { value: "6-20", label: "6〜20名" },
++      { value: "21-50", label: "21〜50名" },
++      { value: "51+", label: "51名以上" },
++    ],
++  },
++  {
++    id: "annual_revenue",
++    label: "年間売上の規模を教えてください",
++    type: "card" as const,
++    options: [
++      { value: "500", label: "1,000万円未満" },
++      { value: "2000", label: "1,000〜3,000万円" },
++      { value: "7500", label: "3,000万〜1億円" },
++      { value: "15000", label: "1億円以上" },
++    ],
++  },
++  {
++    id: "investment_purposes",
++    label: "興味のある分野を選んでください",
++    subtitle: "複数選択できます",
++    type: "multi" as const,
++    options: [
++      { value: "設備投資", label: "設備投資" },
++      { value: "IT導入", label: "IT導入" },
++      { value: "人材採用・育成", label: "人材採用・育成" },
++      { value: "販路拡大", label: "販路拡大" },
++      { value: "事業転換", label: "事業転換" },
++    ],
++  },
++  {
++    id: "prefecture",
++    label: "所在地（都道府県）を選んでください",
++    type: "select" as const,
++    options: [
++      "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県",
++      "茨城県", "栃木県", "群馬県", "埼玉県", "千葉県", "東京都", "神奈川県",
++      "新潟県", "富山県", "石川県", "福井県", "山梨県", "長野県", "岐阜県",
++      "静岡県", "愛知県", "三重県", "滋賀県", "京都府", "大阪府", "兵庫県",
++      "奈良県", "和歌山県", "鳥取県", "島根県", "岡山県", "広島県", "山口県",
++      "徳島県", "香川県", "愛媛県", "高知県", "福岡県", "佐賀県", "長崎県",
++      "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県",
++    ].map((p) => ({ value: p, label: p })),
++  },
+ ];
+ 
+-const YEAR_OPTIONS = (() => {
+-  const years = [{ label: "選択してください", value: "" }];
+-  for (let y = 2026; y >= 1950; y--) {
+-    years.push({ label: `${y}年`, value: String(y) });
+-  }
+-  return years;
+-})();
+-
+-const STEPS = [
+-  { id: 1, label: "基本情報", fields: ["industry", "employee_count"] },
+-  { id: 2, label: "会社情報", fields: ["annual_revenue", "capital", "established_year", "prefecture"] },
+-  { id: 3, label: "投資目的", fields: ["investment_purposes", "options"] },
+-];
+-
+-const ANALYSIS_MESSAGES = [
++const LOADING_MESSAGES = [
+   "企業情報を確認しています...",
+   "対象の補助金を検索しています...",
+   "適合度を計算しています...",
+-  "受給目安額を算出しています...",
+   "結果をまとめています...",
+ ];
+ 
+ export default function Diagnosis() {
+   const router = useRouter();
++  const [currentQ, setCurrentQ] = useState(0);
++  const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+   const [loading, setLoading] = useState(false);
+-  const [analysisStep, setAnalysisStep] = useState(0);
+-  const [currentStep, setCurrentStep] = useState(1);
+-  const [form, setForm] = useState({
+-    industry: "",
+-    employee_count: "",
+-    annual_revenue: "",
+-    capital: "",
+-    established_year: "",
+-    prefecture: "",
+-    has_wage_increase_plan: false,
+-    has_gbiz_id: false,
+-    investment_purposes: [] as string[],
+-    interested_in_startup_loan: false,
+-  });
++  const [loadingStep, setLoadingStep] = useState(0);
++
++  const question = QUESTIONS[currentQ];
++  const total = QUESTIONS.length;
++  const progress = ((currentQ) / total) * 100;
++
++  useEffect(() => {
++    trackEvent("diagnosis_start");
++  }, []);
+ 
+-  // ローディングアニメーション
+   useEffect(() => {
+     if (!loading) return;
+     const interval = setInterval(() => {
+-      setAnalysisStep((prev) => {
+-        if (prev < ANALYSIS_MESSAGES.length - 1) return prev + 1;
+-        return prev;
+-      });
+-    }, 600);
++      setLoadingStep((prev) =>
++        prev < LOADING_MESSAGES.length - 1 ? prev + 1 : prev
++      );
++    }, 700);
+     return () => clearInterval(interval);
+   }, [loading]);
+ 
+-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+-    const { name, value, type } = e.target;
+-    setForm((prev) => ({
+-      ...prev,
+-      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+-    }));
++  const selectAnswer = (value: string) => {
++    if (question.type === "multi") {
++      const current = (answers[question.id] as string[]) || [];
++      const updated = current.includes(value)
++        ? current.filter((v) => v !== value)
++        : [...current, value];
++      setAnswers({ ...answers, [question.id]: updated });
++    } else {
++      setAnswers({ ...answers, [question.id]: value });
++      trackEvent("diagnosis_progress", { question_number: currentQ + 1 });
++      // カード選択は即次へ
++      if (currentQ < total - 1) {
++        setTimeout(() => setCurrentQ(currentQ + 1), 300);
++      }
++    }
+   };
+ 
+   const canProceed = () => {
+-    if (currentStep === 1) return form.industry && form.employee_count;
+-    if (currentStep === 2) return form.prefecture;
+-    return true;
++    const val = answers[question.id];
++    if (question.type === "multi") return true; // 任意
++    return val && val.length > 0;
++  };
++
++  const goNext = () => {
++    trackEvent("diagnosis_progress", { question_number: currentQ + 1 });
++    if (currentQ < total - 1) {
++      setCurrentQ(currentQ + 1);
++    } else {
++      handleSubmit();
++    }
++  };
++
++  const goBack = () => {
++    if (currentQ > 0) setCurrentQ(currentQ - 1);
+   };
+ 
+   const handleSubmit = async () => {
+     setLoading(true);
+-    setAnalysisStep(0);
++    setLoadingStep(0);
++
++    const employeeMap: Record<string, number> = {
++      "1-5": 3, "6-20": 13, "21-50": 35, "51+": 75,
++    };
+ 
+     const payload = {
+-      ...form,
+       company_name: "（LINE登録後に取得）",
+-      employee_count: parseInt(form.employee_count) || 0,
+-      annual_revenue: form.annual_revenue ? parseInt(form.annual_revenue) * 10000 : null,
+-      capital: form.capital ? parseInt(form.capital) * 10000 : null,
+-      established_year: form.established_year ? parseInt(form.established_year) : null,
+-      investment_purpose: form.investment_purposes.join("、"),
++      industry: answers.industry || "",
++      employee_count: employeeMap[answers.employee_count as string] || 10,
++      annual_revenue: answers.annual_revenue ? parseInt(answers.annual_revenue as string) * 10000 : null,
++      prefecture: answers.prefecture || "",
++      investment_purpose: Array.isArray(answers.investment_purposes)
++        ? (answers.investment_purposes as string[]).join("、")
++        : "",
+     };
+ 
+     try {
+@@ -117,50 +172,89 @@ export default function Diagnosis() {
+       });
+       const data = await res.json();
+       sessionStorage.setItem("diagnosisResult", JSON.stringify(data));
+-
+-      // 最低3秒の分析演出
+       await new Promise((resolve) => setTimeout(resolve, 3000));
++      trackEvent("diagnosis_complete", { subsidies_matched: data.total_matches });
+       router.push("/results");
+     } catch {
+-      alert("エラーが発生しました。しばらくしてからお試しください。");
+-      setLoading(false);
++      // API失敗時はダミーデータで結果表示（デモ用）
++      const dummyResult = {
++        company_id: "demo",
++        total_matches: 3,
++        matches: [
++          {
++            subsidy_id: "monozukuri",
++            subsidy_name: "ものづくり補助金",
++            category: "ものづくり",
++            fit_score: 4,
++            difficulty_rank: "B",
++            recommendation_rank: 1,
++            match_reasons: ["製造業・サービス業が対象", "従業員数が条件内"],
++            unmatch_reasons: [],
++            estimated_amount: 7500000,
++            max_amount: 12500000,
++          },
++          {
++            subsidy_id: "it-hojo",
++            subsidy_name: "IT導入補助金",
++            category: "IT導入",
++            fit_score: 4,
++            difficulty_rank: "C",
++            recommendation_rank: 2,
++            match_reasons: ["ITツール導入に活用可能", "申請が比較的容易"],
++            unmatch_reasons: [],
++            estimated_amount: 3000000,
++            max_amount: 4500000,
++          },
++          {
++            subsidy_id: "shokibo",
++            subsidy_name: "小規模事業者持続化補助金",
++            category: "小規模",
++            fit_score: 3,
++            difficulty_rank: "C",
++            recommendation_rank: 3,
++            match_reasons: ["小規模事業者が対象", "販路開拓に活用可能"],
++            unmatch_reasons: ["従業員50名以上は対象外の場合あり"],
++            estimated_amount: 1500000,
++            max_amount: 2000000,
++          },
++        ],
++      };
++      sessionStorage.setItem("diagnosisResult", JSON.stringify(dummyResult));
++      await new Promise((resolve) => setTimeout(resolve, 3000));
++      trackEvent("diagnosis_complete", { subsidies_matched: 3 });
++      router.push("/results");
+     }
+   };
+ 
+-  // ローディング画面
++  // --- ローディング画面 ---
+   if (loading) {
+     return (
+-      <main className="min-h-screen bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 flex items-center justify-center px-4">
+-        <div className="text-center text-white">
++      <main className="min-h-screen bg-[#FAFBFC] flex items-center justify-center px-4">
++        <div className="text-center">
+           <motion.div
+-            className="w-20 h-20 border-4 border-white/30 border-t-white rounded-full mx-auto mb-8"
++            className="w-16 h-16 border-4 border-[#E5E7EB] border-t-[#1B3A5C] rounded-full mx-auto mb-8"
+             animate={{ rotate: 360 }}
+             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+           />
+-          <motion.h2
+-            className="text-2xl font-bold mb-4"
+-            initial={{ opacity: 0 }}
+-            animate={{ opacity: 1 }}
+-          >
+-            AIが分析しています
+-          </motion.h2>
+-          <div className="space-y-2 min-h-[120px]">
+-            {ANALYSIS_MESSAGES.map((msg, i) => (
++          <h2 className="text-xl font-bold text-[#1B3A5C] mb-6">
++            診断結果を作成しています
++          </h2>
++          <div className="space-y-3 min-h-[100px]">
++            {LOADING_MESSAGES.map((msg, i) => (
+               <motion.p
+                 key={i}
+-                className={`text-sm transition-opacity ${i <= analysisStep ? "opacity-100" : "opacity-0"}`}
++                className="text-[15px] text-[#6B7280]"
+                 initial={{ opacity: 0, x: -10 }}
+-                animate={i <= analysisStep ? { opacity: 1, x: 0 } : {}}
++                animate={i <= loadingStep ? { opacity: 1, x: 0 } : { opacity: 0 }}
+                 transition={{ duration: 0.3 }}
+               >
+-                {i < analysisStep ? "✅" : i === analysisStep ? "🔍" : "⬜"} {msg}
++                {i < loadingStep ? "✅" : i === loadingStep ? "🔍" : ""} {msg}
+               </motion.p>
+             ))}
+           </div>
+-          {/* プログレスバー */}
+-          <div className="w-64 bg-white/20 rounded-full h-2 mx-auto mt-6">
++          <div className="w-64 bg-[#E5E7EB] rounded-full h-2 mx-auto mt-6">
+             <motion.div
+-              className="bg-yellow-400 h-2 rounded-full"
++              className="bg-[#2E7D5B] h-2 rounded-full"
+               initial={{ width: "0%" }}
+               animate={{ width: "100%" }}
+               transition={{ duration: 3, ease: "easeInOut" }}
+@@ -171,223 +265,157 @@ export default function Diagnosis() {
+     );
+   }
+ 
++  // --- 診断フォーム ---
+   return (
+-    <main className="min-h-screen bg-gray-50 py-12 px-4">
+-      <div className="max-w-2xl mx-auto">
+-        <h1 className="text-3xl font-bold text-center mb-2">補助金AI 診断</h1>
+-        <p className="text-gray-500 text-center mb-6">
+-          基本情報を選択して、対象の補助金を診断します
+-        </p>
+-
+-        {/* 進捗バー */}
++    <main className="min-h-screen bg-[#FAFBFC] py-12 px-4">
++      <div className="max-w-[640px] mx-auto">
++        {/* プログレスバー */}
+         <div className="mb-8">
+           <div className="flex justify-between items-center mb-2">
+-            {STEPS.map((step) => (
+-              <div key={step.id} className="flex items-center">
+-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+-                  currentStep >= step.id
+-                    ? "bg-blue-600 text-white"
+-                    : "bg-gray-200 text-gray-500"
+-                }`}>
+-                  {currentStep > step.id ? "✓" : step.id}
+-                </div>
+-                <span className={`ml-2 text-sm hidden sm:inline ${
+-                  currentStep >= step.id ? "text-blue-600 font-medium" : "text-gray-400"
+-                }`}>
+-                  {step.label}
+-                </span>
+-              </div>
+-            ))}
++            <p className="text-[14px] text-[#6B7280]">
++              質問 {currentQ + 1} / {total}
++            </p>
++            <p className="text-[14px] text-[#6B7280]">
++              {currentQ < total - 1 ? `あと${total - currentQ - 1}問` : "最後の質問です"}
++            </p>
+           </div>
+-          <div className="w-full bg-gray-200 rounded-full h-2">
++          <div className="w-full bg-[#E5E7EB] rounded-full h-2">
+             <motion.div
+-              className="bg-blue-600 h-2 rounded-full"
+-              animate={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
+-              transition={{ duration: 0.3 }}
++              className="bg-[#1B3A5C] h-2 rounded-full"
++              animate={{ width: `${progress}%` }}
++              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+             />
+           </div>
+-          <p className="text-xs text-gray-400 text-right mt-1">
+-            ステップ {currentStep}/{STEPS.length}
+-            {currentStep < STEPS.length && " — あと少しで完了！"}
+-          </p>
+         </div>
+ 
+-        <div className="bg-white rounded-lg shadow p-6 sm:p-8">
+-          <AnimatePresence mode="wait">
+-            {/* ステップ1: 基本情報 */}
+-            {currentStep === 1 && (
+-              <motion.div
+-                key="step1"
+-                initial={{ opacity: 0, x: 20 }}
+-                animate={{ opacity: 1, x: 0 }}
+-                exit={{ opacity: 0, x: -20 }}
+-                className="space-y-6"
+-              >
+-                <div>
+-                  <label className="block text-sm font-medium text-gray-700 mb-1">業種 <span className="text-red-500">*</span></label>
+-                  <select name="industry" value={form.industry} onChange={handleChange} required
+-                    className="w-full border rounded-md px-3 py-2 text-gray-900">
+-                    <option value="">選択してください</option>
+-                    {INDUSTRIES.map((i) => <option key={i} value={i}>{i}</option>)}
+-                  </select>
+-                </div>
+-                <div>
+-                  <label className="block text-sm font-medium text-gray-700 mb-1">従業員数 <span className="text-red-500">*</span></label>
+-                  <input
+-                    type="number" name="employee_count" required min="0"
+-                    inputMode="numeric" pattern="[0-9]*"
+-                    value={form.employee_count} onChange={handleChange}
+-                    className="w-full border rounded-md px-3 py-2 text-gray-900"
+-                    placeholder="半角数字で入力（例: 30）"
+-                  />
+-                </div>
+-              </motion.div>
++        {/* 質問カード */}
++        <AnimatePresence mode="wait">
++          <motion.div
++            key={question.id}
++            initial={{ opacity: 0, x: 30 }}
++            animate={{ opacity: 1, x: 0 }}
++            exit={{ opacity: 0, x: -30 }}
++            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
++            className="bg-white rounded-xl border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-6 sm:p-8"
++          >
++            <h2 className="text-[20px] sm:text-[22px] font-bold text-[#1B3A5C] mb-2">
++              {question.label}
++            </h2>
++            {"subtitle" in question && question.subtitle && (
++              <p className="text-[14px] text-[#6B7280] mb-6">{question.subtitle}</p>
+             )}
++            {!("subtitle" in question) && <div className="mb-6" />}
+ 
+-            {/* ステップ2: 会社情報 */}
+-            {currentStep === 2 && (
+-              <motion.div
+-                key="step2"
+-                initial={{ opacity: 0, x: 20 }}
+-                animate={{ opacity: 1, x: 0 }}
+-                exit={{ opacity: 0, x: -20 }}
+-                className="space-y-6"
+-              >
+-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+-                  <div>
+-                    <label className="block text-sm font-medium text-gray-700 mb-1">年間売上</label>
+-                    <select name="annual_revenue" value={form.annual_revenue} onChange={handleChange}
+-                      className="w-full border rounded-md px-3 py-2 text-gray-900">
+-                      {REVENUE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+-                    </select>
+-                  </div>
+-                  <div>
+-                    <label className="block text-sm font-medium text-gray-700 mb-1">資本金（万円）</label>
+-                    <input
+-                      type="number" name="capital"
+-                      inputMode="numeric" pattern="[0-9]*"
+-                      value={form.capital} onChange={handleChange}
+-                      className="w-full border rounded-md px-3 py-2 text-gray-900"
+-                      placeholder="例: 1000"
+-                    />
+-                  </div>
+-                </div>
+-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+-                  <div>
+-                    <label className="block text-sm font-medium text-gray-700 mb-1">設立年</label>
+-                    <select name="established_year" value={form.established_year} onChange={handleChange}
+-                      className="w-full border rounded-md px-3 py-2 text-gray-900">
+-                      {YEAR_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+-                    </select>
+-                  </div>
+-                  <div>
+-                    <label className="block text-sm font-medium text-gray-700 mb-1">所在地 <span className="text-red-500">*</span></label>
+-                    <select name="prefecture" value={form.prefecture} onChange={handleChange} required
+-                      className="w-full border rounded-md px-3 py-2 text-gray-900">
+-                      <option value="">選択してください</option>
+-                      {PREFECTURES.map((p) => <option key={p} value={p}>{p}</option>)}
+-                    </select>
+-                  </div>
+-                </div>
+-              </motion.div>
++            {/* カード選択（単一） */}
++            {question.type === "card" && (
++              <div className="grid grid-cols-2 gap-3">
++                {question.options.map((opt) => {
++                  const isSelected = answers[question.id] === opt.value;
++                  return (
++                    <button
++                      key={opt.value}
++                      onClick={() => selectAnswer(opt.value)}
++                      className={`
++                        p-4 rounded-xl border-2 text-left transition-all duration-200
++                        ${isSelected
++                          ? "border-[#1B3A5C] bg-[#E8EDF3]"
++                          : "border-[#E5E7EB] hover:border-[#1B3A5C]/30 hover:bg-[#FAFBFC]"
++                        }
++                      `}
++                    >
++                      <span className={`text-[15px] font-medium ${isSelected ? "text-[#1B3A5C]" : "text-[#2D2D2D]"}`}>
++                        {opt.label}
++                      </span>
++                    </button>
++                  );
++                })}
++              </div>
+             )}
+ 
+-            {/* ステップ3: 投資目的 */}
+-            {currentStep === 3 && (
+-              <motion.div
+-                key="step3"
+-                initial={{ opacity: 0, x: 20 }}
+-                animate={{ opacity: 1, x: 0 }}
+-                exit={{ opacity: 0, x: -20 }}
+-                className="space-y-6"
+-              >
+-                <div>
+-                  <label className="block text-sm font-medium text-gray-700 mb-2">興味のある分野（複数選択可）</label>
+-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+-                    {[
+-                      "AI導入・DX推進", "業務効率化・省力化", "新製品・新サービス開発",
+-                      "販路拡大・EC構築", "設備投資・機械導入", "人材育成・採用強化",
+-                      "事業承継・M&A", "海外展開", "IT導入（クラウド・SaaS）", "賃上げ・労働環境改善",
+-                    ].map((purpose) => (
+-                      <label key={purpose} className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-colors ${
+-                        form.investment_purposes.includes(purpose)
+-                          ? "bg-blue-50 border-blue-300"
+-                          : "hover:bg-gray-50"
++            {/* 複数選択 */}
++            {question.type === "multi" && (
++              <div className="grid grid-cols-2 gap-3">
++                {question.options.map((opt) => {
++                  const current = (answers[question.id] as string[]) || [];
++                  const isSelected = current.includes(opt.value);
++                  return (
++                    <button
++                      key={opt.value}
++                      onClick={() => selectAnswer(opt.value)}
++                      className={`
++                        p-4 rounded-xl border-2 text-left transition-all duration-200 flex items-center gap-3
++                        ${isSelected
++                          ? "border-[#1B3A5C] bg-[#E8EDF3]"
++                          : "border-[#E5E7EB] hover:border-[#1B3A5C]/30"
++                        }
++                      `}
++                    >
++                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 ${
++                        isSelected ? "bg-[#1B3A5C] border-[#1B3A5C]" : "border-[#E5E7EB]"
+                       }`}>
+-                        <input
+-                          type="checkbox"
+-                          checked={form.investment_purposes.includes(purpose)}
+-                          onChange={(e) => {
+-                            setForm((prev) => ({
+-                              ...prev,
+-                              investment_purposes: e.target.checked
+-                                ? [...prev.investment_purposes, purpose]
+-                                : prev.investment_purposes.filter((p) => p !== purpose),
+-                            }));
+-                          }}
+-                          className="rounded"
+-                        />
+-                        <span className="text-sm text-gray-700">{purpose}</span>
+-                      </label>
+-                    ))}
+-                  </div>
+-                </div>
+-
+-                <div className="space-y-3 pt-4 border-t">
+-                  <label className="flex items-center gap-2">
+-                    <input type="checkbox" name="has_wage_increase_plan"
+-                      checked={form.has_wage_increase_plan} onChange={handleChange}
+-                      className="rounded" />
+-                    <span className="text-sm text-gray-700">賃上げ計画がある</span>
+-                  </label>
+-                  <label className="flex items-center gap-2">
+-                    <input type="checkbox" name="has_gbiz_id"
+-                      checked={form.has_gbiz_id} onChange={handleChange}
+-                      className="rounded" />
+-                    <span className="text-sm text-gray-700">GビズIDを持っている</span>
+-                  </label>
+-                  <label className="flex items-center gap-2">
+-                    <input type="checkbox" name="interested_in_startup_loan"
+-                      checked={form.interested_in_startup_loan} onChange={handleChange}
+-                      className="rounded" />
+-                    <span className="text-sm text-gray-700">創業融資にも興味がある</span>
+-                  </label>
+-                </div>
+-              </motion.div>
++                        {isSelected && <span className="text-white text-xs">✓</span>}
++                      </div>
++                      <span className={`text-[15px] font-medium ${isSelected ? "text-[#1B3A5C]" : "text-[#2D2D2D]"}`}>
++                        {opt.label}
++                      </span>
++                    </button>
++                  );
++                })}
++              </div>
+             )}
+-          </AnimatePresence>
+ 
+-          {/* ナビゲーションボタン */}
+-          <div className="flex justify-between mt-8">
+-            {currentStep > 1 ? (
+-              <button
+-                onClick={() => setCurrentStep((s) => s - 1)}
+-                className="px-6 py-3 text-gray-600 border rounded-lg hover:bg-gray-50 transition-colors"
++            {/* プルダウン選択 */}
++            {question.type === "select" && (
++              <select
++                value={(answers[question.id] as string) || ""}
++                onChange={(e) => selectAnswer(e.target.value)}
++                className="w-full border-2 border-[#E5E7EB] rounded-xl px-4 py-4 text-[16px] text-[#2D2D2D] focus:border-[#1B3A5C] focus:outline-none transition-colors"
+               >
+-                ← 戻る
+-              </button>
+-            ) : (
+-              <div />
++                <option value="">選択してください</option>
++                {question.options.map((opt) => (
++                  <option key={opt.value} value={opt.value}>{opt.label}</option>
++                ))}
++              </select>
+             )}
++          </motion.div>
++        </AnimatePresence>
+ 
+-            {currentStep < STEPS.length ? (
+-              <button
+-                onClick={() => setCurrentStep((s) => s + 1)}
+-                disabled={!canProceed()}
+-                className="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+-              >
+-                次へ →
+-              </button>
+-            ) : (
+-              <button
+-                onClick={handleSubmit}
+-                className="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors text-lg"
+-              >
+-                無料で診断する 🔍
+-              </button>
+-            )}
+-          </div>
++        {/* ナビゲーション */}
++        <div className="flex justify-between mt-6">
++          {currentQ > 0 ? (
++            <button
++              onClick={goBack}
++              className="text-[15px] text-[#6B7280] hover:text-[#2D2D2D] transition-colors"
++            >
++              ← 前の質問に戻る
++            </button>
++          ) : (
++            <div />
++          )}
++
++          {(question.type === "multi" || question.type === "select") && (
++            <button
++              onClick={goNext}
++              disabled={question.type === "select" && !canProceed()}
++              className={`
++                px-8 py-3 rounded-xl font-bold text-[16px] transition-all duration-200
++                ${canProceed()
++                  ? currentQ === total - 1
++                    ? "bg-[#E8772E] text-white hover:bg-[#D06A28]"
++                    : "bg-[#1B3A5C] text-white hover:bg-[#244B73]"
++                  : "bg-[#E5E7EB] text-[#6B7280] cursor-not-allowed"
++                }
++              `}
++            >
++              {currentQ === total - 1 ? "診断する" : "次へ"}
++            </button>
++          )}
+         </div>
++
++        {/* 安心テキスト */}
++        <p className="text-center text-[12px] text-[#6B7280] mt-8">
++          ※ 個人情報の入力は不要です。診断は完全無料です。
++        </p>
+       </div>
+     </main>
+   );
+diff --git a/frontend/src/app/results/page.tsx b/frontend/src/app/results/page.tsx
+index d5d27e4..bb85552 100644
+--- a/frontend/src/app/results/page.tsx
++++ b/frontend/src/app/results/page.tsx
+@@ -1,10 +1,10 @@
+ "use client";
+ 
+-import { useEffect, useState, useRef } from "react";
++import { useEffect, useState } from "react";
+ import { useRouter } from "next/navigation";
+ import Link from "next/link";
+ import { motion } from "framer-motion";
+-import confetti from "canvas-confetti";
++import { trackEvent } from "@/components/ui/Analytics";
+ 
+ interface MatchResult {
+   subsidy_id: string;
+@@ -19,330 +19,214 @@ interface MatchResult {
+   max_amount: number | null;
+ }
+ 
+-const PAYMENT_TIMELINE: Record<string, string> = {
+-  "省力化": "採択後 約6〜8ヶ月",
+-  "IT導入": "採択後 約4〜6ヶ月",
+-  "ものづくり": "採択後 約6〜8ヶ月",
+-  "小規模": "採択後 約4〜6ヶ月",
+-  "事業承継": "採択後 約4〜6ヶ月",
+-  "新事業": "採択後 約6〜10ヶ月",
+-  "業務改善": "採択後 約3〜5ヶ月",
+-  "人材": "支給決定後 約2〜4ヶ月",
+-};
+-
+-// 申請締切データ（実際のデータに更新する）
+-const DEADLINES: Record<string, { date: string; label: string }> = {
+-  "省力化": { date: "2026-06-30", label: "2026年6月30日" },
+-  "IT導入": { date: "2026-05-31", label: "2026年5月31日" },
+-  "ものづくり": { date: "2026-04-15", label: "2026年4月15日" },
+-  "小規模": { date: "2026-05-20", label: "2026年5月20日" },
+-  "事業承継": { date: "2026-06-15", label: "2026年6月15日" },
+-  "新事業": { date: "2026-07-31", label: "2026年7月31日" },
+-  "業務改善": { date: "2026-04-30", label: "2026年4月30日" },
+-  "人材": { date: "2026-12-31", label: "随時受付" },
+-};
+-
+-function getDaysRemaining(dateStr: string): number {
+-  const deadline = new Date(dateStr);
+-  const now = new Date();
+-  return Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+-}
+-
+ interface DiagnosisResult {
+   company_id: string;
+   total_matches: number;
+   matches: MatchResult[];
+ }
+ 
+-function Stars({ count }: { count: number }) {
+-  return (
+-    <div>
+-      <p className="text-xs text-gray-500 mb-0.5">適合度</p>
+-      <span className="text-yellow-500 text-lg">
+-        {"★".repeat(count)}{"☆".repeat(5 - count)}
+-      </span>
+-    </div>
+-  );
++function formatAmount(amount: number | null): string {
++  if (!amount) return "—";
++  if (amount >= 100000000) return `${(amount / 100000000).toFixed(1)}億円`;
++  if (amount >= 10000) return `${(amount / 10000).toFixed(0)}万円`;
++  return `${amount}円`;
+ }
+ 
+-function DifficultyBadge({ rank }: { rank: string }) {
+-  const colors: Record<string, string> = {
+-    C: "bg-green-100 text-green-800",
+-    B: "bg-yellow-100 text-yellow-800",
+-    A: "bg-red-100 text-red-800",
+-  };
+-  const labels: Record<string, string> = {
+-    C: "易しい",
+-    B: "普通",
+-    A: "難しい",
++function DifficultyLabel({ rank }: { rank: string }) {
++  const labels: Record<string, { text: string; color: string }> = {
++    C: { text: "比較的申請しやすい", color: "bg-[#E6F4ED] text-[#2E7D5B]" },
++    B: { text: "標準的な難易度", color: "bg-[#FEF3C7] text-[#92400E]" },
++    A: { text: "申請の難易度が高い", color: "bg-[#FEE2E2] text-[#991B1B]" },
+   };
++  const label = labels[rank] || labels.B;
+   return (
+-    <span className={`px-2 py-1 rounded text-xs font-medium ${colors[rank] || "bg-gray-100"}`}>
+-      難易度{rank} — {labels[rank]}
++    <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${label.color}`}>
++      {label.text}
+     </span>
+   );
+ }
+ 
+-function DeadlineBadge({ category }: { category: string }) {
+-  const deadline = DEADLINES[category];
+-  if (!deadline) return null;
+-  if (deadline.label === "随時受付") {
+-    return <span className="text-xs text-green-600">📅 随時受付</span>;
+-  }
+-  const days = getDaysRemaining(deadline.date);
+-  const isUrgent = days <= 30;
++function FitStars({ score }: { score: number }) {
+   return (
+-    <span className={`text-xs font-medium ${isUrgent ? "text-red-600" : "text-gray-600"}`}>
+-      📅 次回締切: {deadline.label}
+-      {isUrgent && <span className="ml-1 bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full text-xs font-bold">あと{days}日</span>}
+-      {!isUrgent && days > 0 && <span className="ml-1 text-gray-400">（あと{days}日）</span>}
++    <span className="text-[#E8772E]">
++      {"★".repeat(Math.min(score, 5))}
++      {"☆".repeat(Math.max(5 - score, 0))}
+     </span>
+   );
+ }
+ 
+-function formatAmount(amount: number | null): string {
+-  if (!amount) return "—";
+-  if (amount >= 100000000) return `${(amount / 100000000).toFixed(1)}億円`;
+-  if (amount >= 10000) return `${(amount / 10000).toFixed(0)}万円`;
+-  return `${amount}円`;
+-}
+-
+ export default function Results() {
+   const router = useRouter();
+   const [result, setResult] = useState<DiagnosisResult | null>(null);
+-  const [selected, setSelected] = useState<Set<string>>(new Set());
+-  const [showBlur, setShowBlur] = useState(true);
+-  const confettiFired = useRef(false);
+ 
+   useEffect(() => {
+     const stored = sessionStorage.getItem("diagnosisResult");
+     if (stored) {
+-      const parsed = JSON.parse(stored) as DiagnosisResult;
+-      setResult(parsed);
+-      setSelected(new Set(parsed.matches.map((m) => m.subsidy_id)));
+-
+-      // confetti
+-      if (!confettiFired.current && parsed.matches.length > 0) {
+-        confettiFired.current = true;
+-        setTimeout(() => {
+-          confetti({
+-            particleCount: 100,
+-            spread: 70,
+-            origin: { y: 0.3 },
+-            colors: ["#3B82F6", "#10B981", "#F59E0B", "#EF4444"],
+-          });
+-        }, 300);
+-      }
++      setResult(JSON.parse(stored) as DiagnosisResult);
+     } else {
+       router.push("/");
+     }
+   }, [router]);
+ 
+   if (!result) {
+-    return <div className="min-h-screen flex items-center justify-center">読み込み中...</div>;
++    return (
++      <div className="min-h-screen bg-[#FAFBFC] flex items-center justify-center">
++        <p className="text-[#6B7280]">読み込み中...</p>
++      </div>
++    );
+   }
+ 
+-  const selectedMatches = result.matches.filter((m) => selected.has(m.subsidy_id));
+-  const totalEstimated = selectedMatches.reduce((sum, m) => sum + (m.estimated_amount || 0), 0);
+-  const totalMax = selectedMatches.reduce((sum, m) => sum + (m.max_amount || 0), 0);
+-
+-  const toggleSelect = (id: string) => {
+-    setSelected((prev) => {
+-      const next = new Set(prev);
+-      if (next.has(id)) next.delete(id);
+-      else next.add(id);
+-      return next;
+-    });
+-  };
+-
+-  const selectAll = () => setSelected(new Set(result.matches.map((m) => m.subsidy_id)));
+-  const deselectAll = () => setSelected(new Set());
+-
+   return (
+-    <main className="min-h-screen bg-gray-50 py-12 px-4">
+-      <div className="max-w-3xl mx-auto">
++    <main className="min-h-screen bg-[#FAFBFC] py-12 px-4">
++      <div className="max-w-[720px] mx-auto">
+         {/* ヘッダー */}
+         <motion.div
+           initial={{ opacity: 0, y: -10 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.5 }}
+-          className="text-center mb-6"
++          className="text-center mb-8"
+         >
+-          <span className="text-4xl mb-2 block">🎉</span>
+-          <h1 className="text-3xl font-bold mb-2">おめでとうございます！</h1>
+-          <p className="text-gray-500">
+-            <span className="text-blue-600 font-bold text-lg">{result.total_matches}件</span>の補助金がマッチしました
++          <h1 className="text-[24px] sm:text-[32px] font-bold text-[#1B3A5C] mb-2">
++            診断結果
++          </h1>
++          <p className="text-[16px] text-[#6B7280]">
++            あなたの会社に合った補助金が
++            <span className="text-[#1B3A5C] font-bold text-[20px] mx-1">{result.total_matches}件</span>
++            見つかりました
+           </p>
+         </motion.div>
+ 
+         {result.matches.length === 0 ? (
+-          <div className="bg-white rounded-lg shadow p-8 text-center">
+-            <p className="text-gray-500 text-lg">該当する補助金が見つかりませんでした</p>
+-            <Link href="/diagnosis" className="text-blue-600 underline mt-4 inline-block">条件を変えて再診断</Link>
++          <div className="bg-white rounded-xl border border-[#E5E7EB] p-8 text-center">
++            <p className="text-[#6B7280] text-[16px] mb-4">
++              条件に合う補助金が見つかりませんでした
++            </p>
++            <Link
++              href="/diagnosis"
++              className="text-[#1B3A5C] font-medium underline"
++            >
++              条件を変えて再診断する
++            </Link>
+           </div>
+         ) : (
+           <>
+             {/* 総額サマリー */}
+             <motion.div
+-              initial={{ opacity: 0, scale: 0.95 }}
++              initial={{ opacity: 0, scale: 0.98 }}
+               animate={{ opacity: 1, scale: 1 }}
+               transition={{ duration: 0.5, delay: 0.2 }}
+-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl shadow-lg p-8 mb-6 text-center"
++              className="bg-gradient-to-r from-[#1B3A5C] to-[#244B73] text-white rounded-xl p-6 sm:p-8 mb-8 text-center"
+             >
+-              <p className="text-sm opacity-80 mb-2">選択した補助金の総額</p>
+-              <p className="text-5xl font-extrabold mb-2">{formatAmount(totalMax)}</p>
+-              <p className="text-sm opacity-80">受給目安額の合計: {formatAmount(totalEstimated)}</p>
+-              <p className="text-sm opacity-80 mt-1">{selectedMatches.length}/{result.matches.length}件を選択中</p>
++              <p className="text-[14px] text-white/70 mb-1">対象補助金の最大合計額</p>
++              <p className="text-[40px] sm:text-[48px] font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
++                {formatAmount(result.matches.reduce((sum, m) => sum + (m.max_amount || 0), 0))}
++              </p>
++              <p className="text-[13px] text-white/60 mt-1">
++                受給目安額の合計: {formatAmount(result.matches.reduce((sum, m) => sum + (m.estimated_amount || 0), 0))}
++              </p>
+             </motion.div>
+ 
+-            {/* 選択操作 */}
+-            <div className="flex justify-between items-center mb-4">
+-              <p className="text-sm text-gray-500">申請したい補助金を選択してください</p>
+-              <div className="flex gap-2">
+-                <button onClick={selectAll} className="text-xs text-blue-600 hover:underline">すべて選択</button>
+-                <span className="text-gray-300">|</span>
+-                <button onClick={deselectAll} className="text-xs text-gray-500 hover:underline">すべて解除</button>
+-              </div>
+-            </div>
+-
+-            {/* 補助金明細 */}
+-            <div className="space-y-4">
+-              {result.matches.map((m, index) => {
+-                const isSelected = selected.has(m.subsidy_id);
+-                // 3件目以降をぼかし（LINE登録で解除）
+-                const isBlurred = showBlur && index >= 2;
+-
+-                return (
+-                  <motion.div
+-                    key={m.subsidy_id}
+-                    initial={{ opacity: 0, y: 20 }}
+-                    animate={{ opacity: 1, y: 0 }}
+-                    transition={{ duration: 0.3, delay: index * 0.1 }}
+-                    className={`relative bg-white rounded-xl shadow p-6 transition-all cursor-pointer border-2 ${
+-                      isSelected && !isBlurred ? "border-blue-500" : "border-transparent"
+-                    } ${!isSelected && !isBlurred ? "opacity-60" : ""}`}
+-                    onClick={() => { if (!isBlurred) toggleSelect(m.subsidy_id); }}
+-                  >
+-                    {isBlurred && (
+-                      <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-xl z-10 flex items-center justify-center">
+-                        <div className="text-center">
+-                          <p className="text-gray-600 font-medium mb-2">🔒 LINE登録で全ての結果を確認</p>
+-                          <a
+-                            href={`https://line.me/R/ti/p/DUMMY_LINE_ID?subsidies=${result.matches.map(m => m.subsidy_id).join(",")}&total=${totalEstimated}`}
+-                            target="_blank"
+-                            rel="noopener noreferrer"
+-                            className="inline-block bg-[#06C755] text-white font-bold px-6 py-2 rounded-full text-sm hover:bg-[#05b34c] transition-colors"
+-                            onClick={(e) => e.stopPropagation()}
+-                          >
+-                            LINEで全て見る
+-                          </a>
+-                        </div>
+-                      </div>
+-                    )}
+-
+-                    <div className="flex items-start justify-between mb-3">
+-                      <div className="flex items-start gap-3">
+-                        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center flex-shrink-0 mt-1 ${
+-                          isSelected ? "bg-blue-500 border-blue-500" : "border-gray-300"
+-                        }`}>
+-                          {isSelected && <span className="text-white text-sm">✓</span>}
+-                        </div>
+-                        <div>
+-                          <div className="flex items-center gap-2 mb-1">
+-                            <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">
+-                              #{m.recommendation_rank}
+-                            </span>
+-                            <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded">
+-                              {m.category}
+-                            </span>
+-                          </div>
+-                          <h2 className="text-lg font-bold text-gray-900">{m.subsidy_name}</h2>
+-                          <DeadlineBadge category={m.category} />
+-                        </div>
+-                      </div>
+-                      <div className="text-right">
+-                        <Stars count={m.fit_score} />
+-                        <div className="mt-1">
+-                          <DifficultyBadge rank={m.difficulty_rank} />
+-                        </div>
++            {/* 補助金カード */}
++            <div className="space-y-4 mb-8">
++              {result.matches.map((m, index) => (
++                <motion.div
++                  key={m.subsidy_id}
++                  initial={{ opacity: 0, y: 20 }}
++                  animate={{ opacity: 1, y: 0 }}
++                  transition={{ duration: 0.4, delay: 0.1 * index, ease: [0.25, 0.1, 0.25, 1] }}
++                  className="bg-white rounded-xl border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-5 sm:p-6"
++                >
++                  <div className="flex items-start justify-between mb-3">
++                    <div>
++                      <h2 className="text-[17px] font-bold text-[#1B3A5C] mb-1">
++                        {m.subsidy_name}
++                      </h2>
++                      <div className="flex items-center gap-2">
++                        <DifficultyLabel rank={m.difficulty_rank} />
++                        <span className="text-[13px] text-[#6B7280]">
++                          適合度 <FitStars score={m.fit_score} />
++                        </span>
+                       </div>
+                     </div>
+-
+-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 ml-9">
+-                      <div>
+-                        <span className="text-xs text-gray-500">受給目安額</span>
+-                        <p className="text-xl font-bold text-blue-600">{formatAmount(m.estimated_amount)}</p>
+-                      </div>
+-                      <div>
+-                        <span className="text-xs text-gray-500">補助上限</span>
+-                        <p className="text-lg text-gray-700">{formatAmount(m.max_amount)}</p>
+-                      </div>
+-                      <div>
+-                        <span className="text-xs text-gray-500">入金までの目安</span>
+-                        <p className="text-sm text-gray-700">{PAYMENT_TIMELINE[m.category] || "採択後 約4〜8ヶ月"}</p>
+-                      </div>
++                  </div>
++
++                  <div className="grid grid-cols-2 gap-4 mb-3">
++                    <div>
++                      <p className="text-[12px] text-[#6B7280]">受給目安額</p>
++                      <p className="text-[20px] font-bold text-[#1B3A5C]" style={{ fontFamily: "'Inter', sans-serif" }}>
++                        {formatAmount(m.estimated_amount)}
++                      </p>
+                     </div>
+-
+-                    {m.match_reasons.length > 0 && (
+-                      <div className="mb-2 ml-9">
+-                        <span className="text-xs text-gray-500">マッチ理由:</span>
+-                        <div className="flex flex-wrap gap-1 mt-1">
+-                          {m.match_reasons.map((r, i) => (
+-                            <span key={i} className="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded">✓ {r}</span>
+-                          ))}
+-                        </div>
+-                      </div>
+-                    )}
+-
+-                    {m.unmatch_reasons.length > 0 && (
+-                      <div className="ml-9">
+-                        <span className="text-xs text-gray-500">注意点:</span>
+-                        <div className="flex flex-wrap gap-1 mt-1">
+-                          {m.unmatch_reasons.map((r, i) => (
+-                            <span key={i} className="bg-red-50 text-red-700 text-xs px-2 py-0.5 rounded">△ {r}</span>
+-                          ))}
+-                        </div>
+-                      </div>
+-                    )}
+-                  </motion.div>
+-                );
+-              })}
++                    <div>
++                      <p className="text-[12px] text-[#6B7280]">補助上限</p>
++                      <p className="text-[17px] font-bold text-[#2D2D2D]" style={{ fontFamily: "'Inter', sans-serif" }}>
++                        {formatAmount(m.max_amount)}
++                      </p>
++                    </div>
++                  </div>
++
++                  {m.match_reasons.length > 0 && (
++                    <div className="flex flex-wrap gap-1.5">
++                      {m.match_reasons.map((r, i) => (
++                        <span key={i} className="text-[12px] bg-[#E6F4ED] text-[#2E7D5B] px-2 py-0.5 rounded-full">
++                          ✓ {r}
++                        </span>
++                      ))}
++                    </div>
++                  )}
++
++                  {m.unmatch_reasons.length > 0 && (
++                    <div className="flex flex-wrap gap-1.5 mt-2">
++                      {m.unmatch_reasons.map((r, i) => (
++                        <span key={i} className="text-[12px] bg-[#FEF3C7] text-[#92400E] px-2 py-0.5 rounded-full">
++                          △ {r}
++                        </span>
++                      ))}
++                    </div>
++                  )}
++                </motion.div>
++              ))}
+             </div>
+ 
+-            {/* ぼかし解除リンク（デバッグ/テスト用、本番では削除） */}
+-            {showBlur && result.matches.length > 2 && (
+-              <p className="text-center mt-4">
+-                <button onClick={() => setShowBlur(false)} className="text-xs text-gray-400 hover:text-gray-600">
+-                  ※テスト: ぼかしを解除
+-                </button>
++            {/* LINE登録CTA */}
++            <motion.div
++              initial={{ opacity: 0, y: 10 }}
++              animate={{ opacity: 1, y: 0 }}
++              transition={{ duration: 0.5, delay: 0.5 }}
++              className="bg-white rounded-xl border border-[#E5E7EB] p-6 sm:p-8 text-center"
++            >
++              <h3 className="text-[18px] font-bold text-[#1B3A5C] mb-2">
++                詳しい情報をLINEでお届けします
++              </h3>
++              <p className="text-[14px] text-[#6B7280] mb-5 leading-[1.8]">
++                申請方法や締切、専門家への相談など
++                <br />
++                補助金活用に役立つ情報をお届けします
+               </p>
+-            )}
+-
+-            {/* LINE@一括申請ボタン（固定フッター） */}
+-            <div className="sticky bottom-0 bg-white border-t shadow-lg p-4 -mx-4 mt-8 rounded-t-xl">
+               <a
+-                href={`https://line.me/R/ti/p/DUMMY_LINE_ID?subsidies=${selectedMatches.map(m => m.subsidy_id).join(",")}&total=${totalEstimated}&names=${encodeURIComponent(selectedMatches.map(m => m.subsidy_name).join(","))}`}
++                href="https://line.me/R/ti/p/DUMMY_LINE_ID"
+                 target="_blank"
+                 rel="noopener noreferrer"
+-                className={`block w-full py-4 rounded-lg font-bold text-lg text-center transition-all ${
+-                  selectedMatches.length > 0
+-                    ? "bg-[#06C755] text-white hover:bg-[#05b34c]"
+-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+-                }`}
+-                onClick={(e) => { if (selectedMatches.length === 0) e.preventDefault(); }}
++                onClick={() => trackEvent("line_register_click")}
++                className="inline-block bg-[#06C755] text-white font-bold text-[16px] px-10 py-4 rounded-xl hover:bg-[#05b34c] transition-colors"
+               >
+-                {selectedMatches.length > 0
+-                  ? `選択した${selectedMatches.length}件をLINEで一括申請する`
+-                  : "申請する補助金を選択してください"
+-                }
++                LINEで詳しい情報を受け取る
+               </a>
+-              <p className="text-xs text-gray-400 text-center mt-2">提携行政書士が申請をサポートします</p>
+-            </div>
++              <p className="text-[12px] text-[#6B7280] mt-3">
++                ※ 提携行政書士が申請をサポートします
++              </p>
++            </motion.div>
+           </>
+         )}
+ 
+-        <div className="text-center mt-8">
+-          <Link href="/diagnosis" className="text-blue-600 underline">条件を変えて再診断</Link>
++        {/* 再診断リンク */}
++        <div className="text-center mt-6">
++          <Link
++            href="/diagnosis"
++            className="text-[14px] text-[#6B7280] hover:text-[#1B3A5C] transition-colors"
++          >
++            ← 条件を変えて再診断する
++          </Link>
+         </div>
+       </div>
+     </main>
+-- 
+2.50.1 (Apple Git-155)
+
+

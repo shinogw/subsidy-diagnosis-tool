@@ -1,0 +1,39 @@
+From 3505b0e2c2674177982a5d556c980f3bd3ab377e Mon Sep 17 00:00:00 2001
+From: R S <rs@arunoMac-mini.local>
+Date: Thu, 5 Mar 2026 17:55:41 +0800
+Subject: [PATCH 10/12] =?UTF-8?q?FAQ=20GA4=E3=82=A4=E3=83=99=E3=83=B3?=
+ =?UTF-8?q?=E3=83=88=E8=BF=BD=E5=8A=A0=20+=20=E3=83=93=E3=83=AB=E3=83=89?=
+ =?UTF-8?q?=E7=A2=BA=E8=AA=8DOK?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ frontend/src/components/sections/FAQ.tsx | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/frontend/src/components/sections/FAQ.tsx b/frontend/src/components/sections/FAQ.tsx
+index 6cf4dad..5658593 100644
+--- a/frontend/src/components/sections/FAQ.tsx
++++ b/frontend/src/components/sections/FAQ.tsx
+@@ -1,6 +1,7 @@
+ "use client";
+ 
+ import FadeIn from "@/components/ui/FadeIn";
++import { trackEvent } from "@/components/ui/Analytics";
+ 
+ const faqs = [
+   {
+@@ -37,7 +38,7 @@ export default function FAQ() {
+         <div className="space-y-3">
+           {faqs.map((item, i) => (
+             <FadeIn key={i} delay={i * 0.05}>
+-              <details className="group bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
++              <details className="group bg-white rounded-xl border border-[#E5E7EB] overflow-hidden" onClick={() => trackEvent("faq_open", { question_id: `q${i + 1}` })}>
+                 <summary className="flex items-center justify-between p-5 sm:p-6 cursor-pointer hover:bg-[#FAFBFC] transition-colors">
+                   <span className="font-medium text-[#2D2D2D] text-[16px] pr-4">{item.q}</span>
+                   <span className="text-[#6B7280] group-open:rotate-180 transition-transform duration-300 shrink-0">
+-- 
+2.50.1 (Apple Git-155)
+
+

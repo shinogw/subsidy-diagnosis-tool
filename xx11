@@ -1,0 +1,298 @@
+From 0d1cade6941b4dd7a14f81eabe80418fbf2f50e1 Mon Sep 17 00:00:00 2001
+From: R S <rs@arunoMac-mini.local>
+Date: Thu, 5 Mar 2026 18:30:38 +0800
+Subject: [PATCH 12/12] =?UTF-8?q?=E7=B5=B5=E6=96=87=E5=AD=97=E2=86=92SVG?=
+ =?UTF-8?q?=E3=82=A2=E3=82=A4=E3=82=B3=E3=83=B3=E5=85=A8=E9=9D=A2=E7=BD=AE?=
+ =?UTF-8?q?=E6=8F=9B=20+=20=E6=82=A9=E3=81=BF=E2=86=92=E8=A7=A3=E6=B1=BA?=
+ =?UTF-8?q?=E3=81=AE=E5=AF=BE=E6=AF=94=E6=A7=8B=E9=80=A0=E8=BF=BD=E5=8A=A0?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- lucide-react導入。全セクションの絵文字をSVGアイコンに置換
+- PainPoints: 悩みカードに「→ 解決策」セクション追加（課題→解決の対比）
+- Steps: アイコンサイズ拡大（w-10 h-10）、背景色付き
+- WhyTrust: SVGアイコン化
+- Hero: バッジの絵文字→SVGアイコン、モック内のアイコン削除
+---
+ frontend/package-lock.json                    | 10 ++++++
+ frontend/package.json                         |  1 +
+ frontend/src/components/sections/Hero.tsx     | 12 ++++---
+ .../src/components/sections/PainPoints.tsx    | 35 +++++++++++++------
+ frontend/src/components/sections/Steps.tsx    | 23 ++++++------
+ frontend/src/components/sections/WhyTrust.tsx | 15 ++++----
+ 6 files changed, 65 insertions(+), 31 deletions(-)
+
+diff --git a/frontend/package-lock.json b/frontend/package-lock.json
+index 538d145..7da862b 100644
+--- a/frontend/package-lock.json
++++ b/frontend/package-lock.json
+@@ -10,6 +10,7 @@
+       "dependencies": {
+         "canvas-confetti": "^1.9.4",
+         "framer-motion": "^12.34.5",
++        "lucide-react": "^0.577.0",
+         "next": "16.1.6",
+         "react": "19.2.3",
+         "react-dom": "19.2.3"
+@@ -4915,6 +4916,15 @@
+         "yallist": "^3.0.2"
+       }
+     },
++    "node_modules/lucide-react": {
++      "version": "0.577.0",
++      "resolved": "https://registry.npmjs.org/lucide-react/-/lucide-react-0.577.0.tgz",
++      "integrity": "sha512-4LjoFv2eEPwYDPg/CUdBJQSDfPyzXCRrVW1X7jrx/trgxnxkHFjnVZINbzvzxjN70dxychOfg+FTYwBiS3pQ5A==",
++      "license": "ISC",
++      "peerDependencies": {
++        "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0"
++      }
++    },
+     "node_modules/magic-string": {
+       "version": "0.30.21",
+       "resolved": "https://registry.npmjs.org/magic-string/-/magic-string-0.30.21.tgz",
+diff --git a/frontend/package.json b/frontend/package.json
+index a525c23..a959fc2 100644
+--- a/frontend/package.json
++++ b/frontend/package.json
+@@ -11,6 +11,7 @@
+   "dependencies": {
+     "canvas-confetti": "^1.9.4",
+     "framer-motion": "^12.34.5",
++    "lucide-react": "^0.577.0",
+     "next": "16.1.6",
+     "react": "19.2.3",
+     "react-dom": "19.2.3"
+diff --git a/frontend/src/components/sections/Hero.tsx b/frontend/src/components/sections/Hero.tsx
+index f95149c..997fc0b 100644
+--- a/frontend/src/components/sections/Hero.tsx
++++ b/frontend/src/components/sections/Hero.tsx
+@@ -2,6 +2,7 @@
+ 
+ import { motion } from "framer-motion";
+ import CTAButton from "@/components/ui/CTAButton";
++import { ShieldCheck, CheckCircle, Timer } from "lucide-react";
+ 
+ export default function Hero() {
+   return (
+@@ -21,13 +22,16 @@ export default function Hero() {
+             >
+               <div className="flex flex-wrap gap-2 mb-6">
+                 <span className="inline-flex items-center gap-1.5 bg-[#E6F4ED] text-[#2E7D5B] text-[13px] font-medium px-3.5 py-1.5 rounded-full">
+-                  🏛️ 行政書士監修
++                  <ShieldCheck className="w-3.5 h-3.5" strokeWidth={2} />
++                  行政書士監修
+                 </span>
+                 <span className="inline-flex items-center gap-1.5 bg-[#E8EDF3] text-[#1B3A5C] text-[13px] font-medium px-3.5 py-1.5 rounded-full">
+-                  ✅ 完全無料
++                  <CheckCircle className="w-3.5 h-3.5" strokeWidth={2} />
++                  完全無料
+                 </span>
+                 <span className="inline-flex items-center gap-1.5 bg-[#FEF3C7] text-[#92400E] text-[13px] font-medium px-3.5 py-1.5 rounded-full">
+-                  ⏱ 約1分で完了
++                  <Timer className="w-3.5 h-3.5" strokeWidth={2} />
++                  約1分で完了
+                 </span>
+               </div>
+             </motion.div>
+@@ -86,7 +90,7 @@ export default function Hero() {
+                 {/* 診断結果モック */}
+                 <div className="space-y-3 px-1">
+                   <div className="text-center mb-5">
+-                    <span className="text-2xl mb-1 block">🎯</span>
++                    <p className="text-[11px] text-[#6B7280] mb-1">診断結果</p>
+                     <p className="text-[#1B3A5C] font-bold text-[17px] leading-tight">
+                       3件の補助金が<br />見つかりました
+                     </p>
+diff --git a/frontend/src/components/sections/PainPoints.tsx b/frontend/src/components/sections/PainPoints.tsx
+index 6f4043a..afefa95 100644
+--- a/frontend/src/components/sections/PainPoints.tsx
++++ b/frontend/src/components/sections/PainPoints.tsx
+@@ -1,25 +1,32 @@
+ "use client";
+ 
+ import FadeIn from "@/components/ui/FadeIn";
++import { Search, Clock, CircleDollarSign, ArrowRight } from "lucide-react";
+ 
+ const pains = [
+   {
+-    icon: "📋",
++    Icon: Search,
++    iconColor: "text-[#1B3A5C]",
+     bgColor: "bg-[#E8EDF3]",
+     title: "種類が多すぎて分からない",
+     desc: "補助金は3,000種類以上。自分の会社に合うものを調べる時間も余裕もない",
++    solve: "5つの質問で自動マッチング",
+   },
+   {
+-    icon: "⏰",
++    Icon: Clock,
++    iconColor: "text-[#92400E]",
+     bgColor: "bg-[#FEF3C7]",
+     title: "調べたけど挫折した",
+     desc: "申請書類が複雑で、本業に追われて手が回らない。途中で諦めた経験がある",
++    solve: "行政書士が申請をサポート",
+   },
+   {
+-    icon: "💰",
++    Icon: CircleDollarSign,
++    iconColor: "text-[#2E7D5B]",
+     bgColor: "bg-[#E6F4ED]",
+     title: "いくらもらえるか見えない",
+     desc: "補助金の存在は知っていても、自社がいくら受給できるのか分からず動けない",
++    solve: "受給目安額をすぐに表示",
+   },
+ ];
+ 
+@@ -38,14 +45,22 @@ export default function PainPoints() {
+         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+           {pains.map((item, i) => (
+             <FadeIn key={item.title} delay={i * 0.1}>
+-              <div className="bg-white rounded-xl p-6 border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 h-full">
+-                {/* アイコン */}
+-                <div className={`w-14 h-14 ${item.bgColor} rounded-2xl flex items-center justify-center text-2xl mb-5`}>
+-                  {item.icon}
++              <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
++                {/* 上部: 悩み */}
++                <div className="p-6 flex-1">
++                  <div className={`w-12 h-12 ${item.bgColor} rounded-xl flex items-center justify-center mb-4`}>
++                    <item.Icon className={`w-6 h-6 ${item.iconColor}`} strokeWidth={1.5} />
++                  </div>
++                  <h3 className="font-bold text-[17px] text-[#1B3A5C] mb-2 leading-[1.4]">{item.title}</h3>
++                  <p className="text-[14px] text-[#6B7280] leading-[1.8]">{item.desc}</p>
++                </div>
++                {/* 下部: 解決 */}
++                <div className="px-6 py-4 border-t border-[#E5E7EB] bg-[#FAFBFC] rounded-b-xl">
++                  <div className="flex items-center gap-2">
++                    <ArrowRight className="w-4 h-4 text-[#2E7D5B] shrink-0" />
++                    <p className="text-[13px] font-medium text-[#2E7D5B]">{item.solve}</p>
++                  </div>
+                 </div>
+-                {/* テキスト（左揃え） */}
+-                <h3 className="font-bold text-[17px] text-[#1B3A5C] mb-3 leading-[1.4]">{item.title}</h3>
+-                <p className="text-[14px] text-[#6B7280] leading-[1.8]">{item.desc}</p>
+               </div>
+             </FadeIn>
+           ))}
+diff --git a/frontend/src/components/sections/Steps.tsx b/frontend/src/components/sections/Steps.tsx
+index 9374b6d..3e7b0d9 100644
+--- a/frontend/src/components/sections/Steps.tsx
++++ b/frontend/src/components/sections/Steps.tsx
+@@ -1,27 +1,31 @@
+ "use client";
+ 
+ import FadeIn from "@/components/ui/FadeIn";
++import { ClipboardList, BarChart3, UserCheck } from "lucide-react";
+ 
+ const steps = [
+   {
+     step: "1",
+     title: "5つの質問に回答",
+     desc: "業種・従業員数など、選択するだけの簡単な質問です。入力は不要です",
+-    icon: "📋",
++    Icon: ClipboardList,
++    iconColor: "text-[#1B3A5C]",
+     bgColor: "bg-[#E8EDF3]",
+   },
+   {
+     step: "2",
+     title: "結果をその場で確認",
+     desc: "対象の補助金・受給目安額・難易度がすぐに表示されます",
+-    icon: "📊",
++    Icon: BarChart3,
++    iconColor: "text-[#2E7D5B]",
+     bgColor: "bg-[#E6F4ED]",
+   },
+   {
+     step: "3",
+     title: "興味があれば専門家に相談",
+     desc: "提携行政書士が申請をサポート。まずはLINEで気軽にご相談ください",
+-    icon: "👤",
++    Icon: UserCheck,
++    iconColor: "text-[#92400E]",
+     bgColor: "bg-[#FEF3C7]",
+   },
+ ];
+@@ -39,24 +43,21 @@ export default function Steps() {
+           </p>
+         </FadeIn>
+ 
+-        {/* デスクトップ: 横並び */}
+         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 relative">
+           {/* 接続線（デスクトップ） */}
+-          <div className="hidden sm:block absolute top-10 left-[22%] right-[22%] h-[2px] bg-[#E5E7EB] z-0" />
++          <div className="hidden sm:block absolute top-12 left-[22%] right-[22%] h-[2px] bg-[#E5E7EB] z-0" />
+ 
+           {steps.map((item, i) => (
+             <FadeIn key={item.step} delay={i * 0.15}>
+               <div className="text-center relative z-10">
+-                {/* アイコン */}
+-                <div className={`w-20 h-20 ${item.bgColor} rounded-2xl flex items-center justify-center text-3xl mx-auto mb-5 shadow-sm`}>
+-                  {item.icon}
++                <div className={`w-24 h-24 ${item.bgColor} rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-sm`}>
++                  <item.Icon className={`w-10 h-10 ${item.iconColor}`} strokeWidth={1.5} />
+                 </div>
+-                {/* ステップ番号 */}
+-                <div className="inline-flex items-center gap-1 text-[12px] font-bold text-white bg-[#1B3A5C] px-3 py-1 rounded-full mb-3">
++                <div className="inline-flex items-center text-[12px] font-bold text-white bg-[#1B3A5C] px-3.5 py-1 rounded-full mb-3">
+                   STEP {item.step}
+                 </div>
+                 <h3 className="font-bold text-[17px] text-[#1B3A5C] mb-3">{item.title}</h3>
+-                <p className="text-[14px] text-[#6B7280] leading-[1.8]">{item.desc}</p>
++                <p className="text-[14px] text-[#6B7280] leading-[1.8] max-w-[260px] mx-auto">{item.desc}</p>
+               </div>
+             </FadeIn>
+           ))}
+diff --git a/frontend/src/components/sections/WhyTrust.tsx b/frontend/src/components/sections/WhyTrust.tsx
+index e845a09..5f4a5bf 100644
+--- a/frontend/src/components/sections/WhyTrust.tsx
++++ b/frontend/src/components/sections/WhyTrust.tsx
+@@ -2,10 +2,12 @@
+ 
+ import FadeIn from "@/components/ui/FadeIn";
+ import CTAButton from "@/components/ui/CTAButton";
++import { ShieldCheck, Lock, Coins } from "lucide-react";
+ 
+ const points = [
+   {
+-    icon: "🏛️",
++    Icon: ShieldCheck,
++    iconColor: "text-[#1B3A5C]",
+     bgColor: "bg-[#E8EDF3]",
+     title: "行政書士が監修",
+     desc: "国家資格を持つ行政書士と提携。診断ロジックから申請サポートまで専門家が関わっています",
+@@ -13,7 +15,8 @@ const points = [
+     badgeColor: "bg-[#E8EDF3] text-[#1B3A5C]",
+   },
+   {
+-    icon: "🔒",
++    Icon: Lock,
++    iconColor: "text-[#2E7D5B]",
+     bgColor: "bg-[#E6F4ED]",
+     title: "個人情報の入力不要",
+     desc: "診断に名前・電話番号・メールアドレスは一切不要。安心してお試しいただけます",
+@@ -21,7 +24,8 @@ const points = [
+     badgeColor: "bg-[#E6F4ED] text-[#2E7D5B]",
+   },
+   {
+-    icon: "¥0",
++    Icon: Coins,
++    iconColor: "text-[#92400E]",
+     bgColor: "bg-[#FEF3C7]",
+     title: "完全無料で何度でも",
+     desc: "診断は何度でも無料です。費用が発生するのは申請サポートをご依頼いただいた場合のみです",
+@@ -49,9 +53,8 @@ export default function WhyTrust() {
+                 <span className={`absolute top-4 right-4 text-[11px] font-bold px-2.5 py-1 rounded-full ${item.badgeColor}`}>
+                   {item.badge}
+                 </span>
+-                {/* アイコン */}
+-                <div className={`w-14 h-14 ${item.bgColor} rounded-2xl flex items-center justify-center text-2xl mb-5`}>
+-                  {item.icon}
++                <div className={`w-12 h-12 ${item.bgColor} rounded-xl flex items-center justify-center mb-4`}>
++                  <item.Icon className={`w-6 h-6 ${item.iconColor}`} strokeWidth={1.5} />
+                 </div>
+                 <h3 className="font-bold text-[17px] text-[#1B3A5C] mb-3">{item.title}</h3>
+                 <p className="text-[14px] text-[#6B7280] leading-[1.8]">{item.desc}</p>
+-- 
+2.50.1 (Apple Git-155)
+

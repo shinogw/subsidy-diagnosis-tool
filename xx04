@@ -1,0 +1,201 @@
+From 06d13195e1c758298e2c6c664eba9c22e54a55fe Mon Sep 17 00:00:00 2001
+From: R S <rs@arunoMac-mini.local>
+Date: Thu, 5 Mar 2026 12:33:20 +0800
+Subject: [PATCH 05/12] =?UTF-8?q?GA4=E8=A8=88=E6=B8=AC=E5=AE=9F=E8=A3=85:?=
+ =?UTF-8?q?=20scroll=5Fdepth,=20cta=5Fclick(location=E5=88=A5),=20page=5Fv?=
+ =?UTF-8?q?iew?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ frontend/src/app/layout.tsx                   |  6 +-
+ .../src/components/sections/CTASection.tsx    |  2 +-
+ frontend/src/components/sections/Hero.tsx     |  2 +-
+ frontend/src/components/sections/WhyTrust.tsx |  2 +-
+ frontend/src/components/ui/Analytics.tsx      | 76 +++++++++++++++++++
+ frontend/src/components/ui/CTAButton.tsx      |  4 +
+ 6 files changed, 88 insertions(+), 4 deletions(-)
+ create mode 100644 frontend/src/components/ui/Analytics.tsx
+
+diff --git a/frontend/src/app/layout.tsx b/frontend/src/app/layout.tsx
+index cd96e0b..76a003a 100644
+--- a/frontend/src/app/layout.tsx
++++ b/frontend/src/app/layout.tsx
+@@ -1,5 +1,6 @@
+ import type { Metadata } from "next";
+ import { Noto_Sans_JP, Inter } from "next/font/google";
++import Analytics from "@/components/ui/Analytics";
+ import "./globals.css";
+ 
+ const notoSansJP = Noto_Sans_JP({
+@@ -38,7 +39,10 @@ export default function RootLayout({
+ }>) {
+   return (
+     <html lang="ja" className={`${notoSansJP.variable} ${inter.variable}`}>
+-      <body className="font-[family-name:var(--font-noto)]">{children}</body>
++      <body className="font-[family-name:var(--font-noto)]">
++        <Analytics />
++        {children}
++      </body>
+     </html>
+   );
+ }
+diff --git a/frontend/src/components/sections/CTASection.tsx b/frontend/src/components/sections/CTASection.tsx
+index f7c5a5b..2e844ca 100644
+--- a/frontend/src/components/sections/CTASection.tsx
++++ b/frontend/src/components/sections/CTASection.tsx
+@@ -18,7 +18,7 @@ export default function CTASection() {
+             <br />
+             個人情報の入力は不要です。
+           </p>
+-          <CTAButton label="無料で診断する" size="large" />
++          <CTAButton label="無料で診断する" size="large" location="footer_cta" />
+           <p className="text-xs text-[#6B7280] mt-5">
+             ※ 登録不要・完全無料・営業電話なし
+           </p>
+diff --git a/frontend/src/components/sections/Hero.tsx b/frontend/src/components/sections/Hero.tsx
+index 1532ff0..ecc0118 100644
+--- a/frontend/src/components/sections/Hero.tsx
++++ b/frontend/src/components/sections/Hero.tsx
+@@ -53,7 +53,7 @@ export default function Hero() {
+               transition={{ duration: 0.5, delay: 0.5 }}
+               className="flex flex-col sm:flex-row items-start gap-4"
+             >
+-              <CTAButton label="無料で診断する" shimmer size="large" />
++              <CTAButton label="無料で診断する" shimmer size="large" location="hero" />
+               <p className="text-xs text-[#6B7280] mt-2 sm:mt-4">
+                 ※ 登録不要・完全無料・営業電話なし
+               </p>
+diff --git a/frontend/src/components/sections/WhyTrust.tsx b/frontend/src/components/sections/WhyTrust.tsx
+index 2aa430b..a71f706 100644
+--- a/frontend/src/components/sections/WhyTrust.tsx
++++ b/frontend/src/components/sections/WhyTrust.tsx
+@@ -52,7 +52,7 @@ export default function WhyTrust() {
+         </div>
+         <FadeIn>
+           <div className="text-center">
+-            <CTAButton label="無料で診断する" />
++            <CTAButton label="無料で診断する" location="trust" />
+           </div>
+         </FadeIn>
+       </div>
+diff --git a/frontend/src/components/ui/Analytics.tsx b/frontend/src/components/ui/Analytics.tsx
+new file mode 100644
+index 0000000..75a7359
+--- /dev/null
++++ b/frontend/src/components/ui/Analytics.tsx
+@@ -0,0 +1,76 @@
++"use client";
++
++import { useEffect } from "react";
++import { usePathname } from "next/navigation";
++
++// GA4 Measurement ID — 本番設定時に環境変数に移す
++const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "";
++
++// gtag helper
++export function gtag(...args: unknown[]) {
++  if (typeof window !== "undefined" && GA_ID) {
++    // eslint-disable-next-line @typescript-eslint/no-explicit-any
++    (window as any).gtag?.(...args);
++  }
++}
++
++// カスタムイベント送信
++export function trackEvent(name: string, params?: Record<string, unknown>) {
++  gtag("event", name, params);
++}
++
++// スクロール深度トラッキング
++function useScrollDepth() {
++  useEffect(() => {
++    if (!GA_ID) return;
++    const thresholds = [25, 50, 75, 100];
++    const fired = new Set<number>();
++
++    const handler = () => {
++      const scrollTop = window.scrollY;
++      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
++      if (docHeight <= 0) return;
++      const percent = Math.round((scrollTop / docHeight) * 100);
++
++      for (const t of thresholds) {
++        if (percent >= t && !fired.has(t)) {
++          fired.add(t);
++          trackEvent("scroll_depth", { percent: t });
++        }
++      }
++    };
++
++    window.addEventListener("scroll", handler, { passive: true });
++    return () => window.removeEventListener("scroll", handler);
++  }, []);
++}
++
++// GA4 Script + page_view tracking
++export default function Analytics() {
++  const pathname = usePathname();
++
++  useScrollDepth();
++
++  useEffect(() => {
++    if (!GA_ID) return;
++    gtag("config", GA_ID, { page_path: pathname });
++  }, [pathname]);
++
++  if (!GA_ID) return null;
++
++  return (
++    <>
++      <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
++      <script
++        dangerouslySetInnerHTML={{
++          __html: `
++            window.dataLayer = window.dataLayer || [];
++            function gtag(){dataLayer.push(arguments);}
++            gtag('js', new Date());
++            gtag('config', '${GA_ID}');
++          `,
++        }}
++      />
++    </>
++  );
++}
+diff --git a/frontend/src/components/ui/CTAButton.tsx b/frontend/src/components/ui/CTAButton.tsx
+index 02d7955..f2e6c72 100644
+--- a/frontend/src/components/ui/CTAButton.tsx
++++ b/frontend/src/components/ui/CTAButton.tsx
+@@ -1,17 +1,20 @@
+ "use client";
+ 
+ import Link from "next/link";
++import { trackEvent } from "@/components/ui/Analytics";
+ 
+ export default function CTAButton({
+   href = "/diagnosis",
+   label = "無料で診断する",
+   shimmer = false,
+   size = "default",
++  location = "unknown",
+ }: {
+   href?: string;
+   label?: string;
+   shimmer?: boolean;
+   size?: "default" | "large";
++  location?: string;
+ }) {
+   const sizeClasses =
+     size === "large"
+@@ -21,6 +24,7 @@ export default function CTAButton({
+   return (
+     <Link
+       href={href}
++      onClick={() => trackEvent("cta_click", { location })}
+       className={`
+         relative inline-block overflow-hidden
+         bg-[#E8772E] text-white font-bold
+-- 
+2.50.1 (Apple Git-155)
+
+

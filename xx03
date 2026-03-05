@@ -1,0 +1,2041 @@
+From 93dfc91ad20c2698c0215222ecbf5e1dab75e9b7 Mon Sep 17 00:00:00 2001
+From: R S <rs@arunoMac-mini.local>
+Date: Thu, 5 Mar 2026 12:31:31 +0800
+Subject: [PATCH 04/12] =?UTF-8?q?LP=E5=85=A8=E9=9D=A2=E3=83=AA=E3=83=95?=
+ =?UTF-8?q?=E3=82=A1=E3=82=AF=E3=82=BF:=20=E3=83=87=E3=82=B6=E3=82=A4?=
+ =?UTF-8?q?=E3=83=B3=E8=A6=8F=E7=B4=84v2.0=E3=83=99=E3=83=BC=E3=82=B9?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- カラー: 青グラデ → 紺+緑+オレンジCTA
+- ヘッドライン: AI/30秒排除 → ターゲット訴求
+- コンポーネント: 490行1ファイル → 14ファイル分割
+- Hero: スマホモックアップ+フロートアニメ追加
+- 信頼バー: 紺グラデ背景
+- フォント: Noto Sans JP + Inter (next/font)
+- モバイル固定CTAバー追加
+- 全8セクション ハードコードで表示
+- 制作規約v2.0 (design/WEB-DESIGN-SPEC.md)
+---
+ design/WEB-DESIGN-SPEC.md                     | 608 ++++++++++++++++++
+ frontend/src/app/globals.css                  |  51 +-
+ frontend/src/app/layout.tsx                   |  33 +-
+ frontend/src/app/page.tsx                     | 436 +------------
+ frontend/src/components/layout/Footer.tsx     |  27 +
+ frontend/src/components/layout/Header.tsx     |  21 +
+ .../src/components/sections/CTASection.tsx    |  29 +
+ frontend/src/components/sections/FAQ.tsx      |  57 ++
+ frontend/src/components/sections/Hero.tsx     | 119 ++++
+ .../src/components/sections/PainPoints.tsx    |  49 ++
+ frontend/src/components/sections/Steps.tsx    |  60 ++
+ .../components/sections/SubsidyExamples.tsx   |  72 +++
+ frontend/src/components/sections/TrustBar.tsx |  39 ++
+ frontend/src/components/sections/WhyTrust.tsx |  61 ++
+ frontend/src/components/ui/CTAButton.tsx      |  40 ++
+ frontend/src/components/ui/CountUp.tsx        |  44 ++
+ frontend/src/components/ui/FadeIn.tsx         |  26 +
+ frontend/src/components/ui/MobileCTABar.tsx   |  43 ++
+ frontend/src/components/ui/SectionWrapper.tsx |  24 +
+ 19 files changed, 1406 insertions(+), 433 deletions(-)
+ create mode 100644 design/WEB-DESIGN-SPEC.md
+ create mode 100644 frontend/src/components/layout/Footer.tsx
+ create mode 100644 frontend/src/components/layout/Header.tsx
+ create mode 100644 frontend/src/components/sections/CTASection.tsx
+ create mode 100644 frontend/src/components/sections/FAQ.tsx
+ create mode 100644 frontend/src/components/sections/Hero.tsx
+ create mode 100644 frontend/src/components/sections/PainPoints.tsx
+ create mode 100644 frontend/src/components/sections/Steps.tsx
+ create mode 100644 frontend/src/components/sections/SubsidyExamples.tsx
+ create mode 100644 frontend/src/components/sections/TrustBar.tsx
+ create mode 100644 frontend/src/components/sections/WhyTrust.tsx
+ create mode 100644 frontend/src/components/ui/CTAButton.tsx
+ create mode 100644 frontend/src/components/ui/CountUp.tsx
+ create mode 100644 frontend/src/components/ui/FadeIn.tsx
+ create mode 100644 frontend/src/components/ui/MobileCTABar.tsx
+ create mode 100644 frontend/src/components/ui/SectionWrapper.tsx
+
+diff --git a/design/WEB-DESIGN-SPEC.md b/design/WEB-DESIGN-SPEC.md
+new file mode 100644
+index 0000000..1e31999
+--- /dev/null
++++ b/design/WEB-DESIGN-SPEC.md
+@@ -0,0 +1,608 @@
++# 補助金診断ツール LP制作規約 v2.0
++> リサーチベース改訂版（競合分析・LP統計・士業LP成功パターン反映）
++
++---
++
++## 0. 競合分析サマリー（設計根拠）
++
++### 主要競合の構造
++| サービス | 特徴 | 弱点（＝差別化ポイント） |
++|---|---|---|
++| smart-hojokin.jp | 「2分で診断」。いきなりフォーム。会社名・電話番号を入力させる | LP説明なし。信頼構築ゼロでいきなり個人情報要求→離脱率高い |
++| moraeru-j.biz | チェックリスト型。助成金・補助金両対応 | UIが古い。質問数が多すぎる（6問×複数チェック）。途中離脱しやすい |
++| 大塚商会/東京海上 | 大手ブランド力で信頼。5分入力→無料個別相談 | 中小企業オーナーには「大手感」が逆に敷居が高い |
++| 弥生（資金調達ナビ） | 既存ユーザー向け。会計ソフトとの連携 | 新規ユーザーの流入導線が弱い |
++
++### メッシの差別化設計
++1. **LP→信頼構築→診断** の順番（競合は「いきなり診断」が多い）
++2. **質問数5問以内**（競合は6問以上が標準。短い方がCVR高い）
++3. **個人情報なしで結果表示**（競合はメール・電話番号必須が多い→ゲーティングはLINE登録に集約）
++4. **行政書士協業の明示**（競合の多くは「誰が対応するか」が不明）
++
++### 統計データ（設計に反映）
++- LP平均CVR: 全業種6.6%（Unbounce）
++- **短いLPの方がCVR 13.5%高い**（FasterCapital）→ セクション数を絞る
++- パーソナライズCTAでCVR 42%向上（HubSpot）→ 「あなたの会社」を主語に
++- **動画埋め込みでCVR 86%向上**（Forbes）→ v2で検討
++- 見出しの質で**CVR 3倍差**（Leadpages）→ ヘッドライン最重視
++- **テスティモニアル（お客様の声）がトップLP の36%に掲載**→ 初期はなくてもOK、実績蓄積後に追加
++- 士業LPで最重要: **ファーストビューに人物写真** → 安心感・信頼性の大幅UP
++
++---
++
++## 0.5. ビジュアル参考サイト（デザインクオリティの基準線）
++
++以下のサイトを **デザインクオリティの最低ライン** として参考にする。
++色やブランドをコピーするのではなく、**クオリティの水準**（余白・タイポグラフィ・人物写真の使い方・UIモックの見せ方・CTA設計・アニメーションの品質）を参考にする。
++
++### Tier 1: 日本BtoB（直接競合ではないが同じターゲット層）
++| サイト | 学ぶポイント |
++|---|---|
++| **SmartHR** (smarthr.jp) | Heroに人物写真+プロダクトUI。ティール1色+白。余白が広い。CTA 2種類（資料DL/無料トライアル）のハードル違い設計 |
++| **ジョブカン** (jobcan.ne.jp) | 「業界No.1」+「30万社」の実績バッジがHero内に。人物写真が大きい。CTA色がオレンジで目立つ |
++| **freee** (freee.co.jp) | Heroスライダーで複数訴求。「法人」「個人」の導線分岐。イラスト+写真の併用 |
++
++### Tier 2: 海外SaaS（動的演出・インタラクションの参考）
++| サイト | 学ぶポイント |
++|---|---|
++| **Linear** (linear.app) | ダーク背景+微細なグラデーション。スクロール連動のフェード。プロダクトUIがヒーロー |
++| **Vercel** (vercel.com) | タイポグラフィの美しさ。余白の使い方。ミニマルだけどリッチ |
++| **Stripe** (stripe.com) | グラデーションの品質。アニメーションが上品。信頼バッジ（ロゴカルーセル） |
++
++### ❌ 今のLPが「しょぼい」理由（自己診断）
++1. **Heroに人物要素ゼロ** → 顔が見えないサイトは信頼されない
++2. **プロダクトUIを見せてない** → 「何ができるか」が分からない
++3. **青グラデーションが安っぽい** → Stripeのグラデーションは美しい。うちのは「とりあえず青にした」感
++4. **余白が足りない** → 情報を詰め込みすぎ
++5. **アニメーションが未実装 or 雑** → SmartHRのようなスムーズなフェードインがない
++6. **タイポグラフィに統一感がない** → フォントサイズ・ウェイトの階層設計が甘い
++
++---
++
++## 1. ターゲット定義
++
++### プライマリ
++- **中小企業オーナー・経営者**（従業員1〜50名）
++- 年齢: 40〜65歳中心
++- ITリテラシー: 中〜低。スマホ主体
++- 検索行動: 「補助金 うちの会社」「補助金 もらえるか」「補助金 診断」
++
++### ペルソナ
++> 田中さん（52歳）。製造業の社長。従業員12名。
++> 「補助金って聞くけど、うちに当てはまるのかわからない。調べたけど種類が多すぎて諦めた。」
++> 「怪しいサイトには個人情報入れたくない。でも無料なら試してみたい。」
++
++### ペルソナから導く設計原則
++1. **不安を先に解消する**（信頼→理解→行動の順）
++2. **専門用語を使わない**
++3. **個人情報のハードルを最小化する**（結果表示は登録不要）
++4. **「自分に関係ある」と3秒で分からせる**
++
++---
++
++## 2. ページ構造（ワイヤーフレーム）
++
++### セクション構成と設計意図
++
++```
++┌─────────────────────────────────────┐
++│ Header（ロゴ + CTAボタン1つのみ）    │ ← ナビリンク不要。LP=1ページ1目的
++├─────────────────────────────────────┤
++│ ① Hero                              │ ← 3秒で「自分に関係ある」と分からせる
++│   - ヘッドライン（最重要）           │
++│   - サブヘッド（1行で価値を説明）     │
++│   - CTAボタン                        │
++│   - 人物写真 or イラスト             │
++├─────────────────────────────────────┤
++│ ② 信頼バー                          │ ← 数字3つ。スクロール前に信頼を構築
++│   （診断実績 / 提携士業数 / 対応補助金数）│
++├─────────────────────────────────────┤
++│ ③ 共感セクション「こんなお悩みありませんか？」│ ← 自分ごと化
++│   - 3つの具体的な悩み                │
++│   - 解決策への導線（テキスト1行）     │
++├─────────────────────────────────────┤
++│ ④ 診断の流れ（3ステップ）           │ ← 「簡単そう」と思わせる
++│   1. 5つの質問に回答                 │
++│   2. 結果をその場で表示              │
++│   3. 興味があれば専門家に相談        │
++├─────────────────────────────────────┤
++│ ⑤ 安心ポイント（3つ）              │ ← 不安要素を潰す
++│   - 行政書士が監修                   │
++│   - 個人情報不要で診断可能           │
++│   - 完全無料                         │
++├─────────────────────────────────────┤
++│ ⑥ 対応補助金の例（カード3-4枚）     │ ← 「こんなのあるんだ」の発見
++│   - 補助金名 / 金額 / 補助率         │
++│   - 「他にも○件以上」のテキスト      │
++├─────────────────────────────────────┤
++│ ⑦ よくある質問（FAQ 5問）           │ ← 残りの不安を解消
++├─────────────────────────────────────┤
++│ ⑧ CTA（最終）                       │ ← フッター直前。決断のタイミング
++│   - ヘッドラインの言い換え           │
++│   - CTAボタン                        │
++├─────────────────────────────────────┤
++│ Footer（運営情報 / プライバシーポリシー / 特商法）│
++└─────────────────────────────────────┘
++```
++
++### セクション数: 8（＋Header/Footer）
++- 競合の多くは10セクション以上 → **短い方がCVR高い統計に基づき絞る**
++- 各セクション=1メッセージ。複合しない
++
++### 削除したもの（v1からの変更）
++- ❌ 「対応補助金一覧」の詳細表示 → 例を3-4枚に絞る。全一覧は診断後に表示
++- ❌ FAQ 7問 → 5問に削減（短い方がいい）
++
++### 追加したもの（リサーチから）
++- ✅ ヘッダーにCTAボタン（スクロール不要でアクション可能）
++- ✅ 安心ポイントを独立セクション化（「個人情報不要」が競合との最大差別化）
++- ✅ モバイル固定CTAバー（後述）
++
++---
++
++## 3. デザイントーン: 「信頼×わかりやすさ×安心」
++
++### カラーパレット
++| 用途 | 色 | HEX | 理由 |
++|---|---|---|---|
++| Primary | 落ち着いた紺 | #1B3A5C | 信頼・誠実。士業・金融の定番 |
++| Primary Light | 薄い紺 | #E8EDF3 | 背景・カードに使用 |
++| Secondary | 温かみのある緑 | #2E7D5B | 「もらえる」ポジティブ感 |
++| Secondary Light | 薄い緑 | #E6F4ED | バッジ・ハイライト背景 |
++| Accent（CTAのみ） | オレンジ | #E8772E | CTA限定。ページ内でこの色はボタンだけ |
++| Accent Hover | 暗めオレンジ | #D06A28 | hover時 |
++| BG Main | オフホワイト | #FAFBFC | 純白は眩しい |
++| BG Alt | ベージュグレー | #F5F3EF | セクション交互配色用 |
++| Text Main | 濃灰 | #2D2D2D | 真っ黒より柔らかい |
++| Text Sub | ミディアム灰 | #6B7280 | 補足テキスト |
++| Border | 薄灰 | #E5E7EB | カード枠線・区切り |
++
++### 配色ルール
++- セクション背景は**BG Main / BG Alt を交互に**。単調にしない
++- Primary色はヘッダー・見出し・アイコンに使用
++- **Accent色（オレンジ）はCTAボタン以外に絶対使わない** → 視線誘導の原則
++- グラデーション不使用。ソリッドカラーのみ
++
++### NG
++- ❌ 鮮やかなコーラル・パープル・シアン
++- ❌ 赤（警告色）
++- ❌ ダーク背景セクション
++- ❌ 背景にグラデーション
++
++---
++
++## 4. タイポグラフィ
++
++| 要素 | フォント | Weight | サイズ(mobile / desktop) |
++|---|---|---|---|
++| H1（Hero） | Noto Sans JP | 700 | 28px / 42px |
++| H2（セクション見出し） | Noto Sans JP | 700 | 22px / 32px |
++| H3（小見出し） | Noto Sans JP | 600 | 18px / 22px |
++| 本文 | Noto Sans JP | 400 | 16px / 17px |
++| 補足・注釈 | Noto Sans JP | 400 | 14px / 15px |
++| 数字強調（信頼バー） | Inter | 700 | 36px / 56px |
++| CTAボタン | Noto Sans JP | 700 | 17px / 18px |
++
++### 必須ルール
++- **本文16px未満禁止**（40-65歳ターゲット。老眼率高い）
++- **行間（line-height）: 1.8〜2.0**
++- **1行あたり最大35文字**（モバイル）/ **最大45文字**（デスクトップ）
++- **letter-spacing: 0.02em〜0.04em**（日本語は詰まると読みにくい）
++- Interは数字・英字のみ。本文は全てNoto Sans JP
++- font-feature-settings: "palt" 1（プロポーショナルメトリクス有効化）
++
++---
++
++## 5. ヘッドライン（最重要）
++
++**統計: ヘッドラインの質でCVR 3倍差（Leadpages）。ここに一番時間をかける。**
++
++### 構造
++```
++[メイン] あなたの会社が使える補助金、1分で見つかります
++[サブ]  5つの質問に答えるだけ。個人情報の入力は不要です。
++```
++
++### ヘッドラインのルール
++1. **「あなた（の会社）」を主語にする**（パーソナライズCTAでCVR 42%UP）
++2. **具体的な数字を入れる**（「1分」「5つの質問」）
++3. **不安を先に潰す**（「個人情報不要」をサブヘッドに）
++4. **1行で収める**（モバイルで2行までが限界）
++
++### NG ヘッドライン
++```
++❌ "補助金診断ツール"（サービス名は見出しじゃない）
++❌ "AI が最適な補助金をマッチング"（横文字・技術アピール）
++❌ "今すぐ無料診断！"（煽り）
++❌ "補助金・助成金の活用をお考えの企業様へ"（企業様=お堅い）
++```
++
++---
++
++## 6. コピーライティング
++
++### トーン
++- **ですます調。**
++- 主語は「あなたの会社」「御社」ではなく「あなた」
++- 専門用語は使わない。使う場合はカッコで即説明
++- 金額は「万円」表記（¥5,000,000 → 500万円）
++
++### ○ / ✗ 対照表
++| ✗ | ○ | 理由 |
++|---|---|---|
++| AIが最適な補助金をレコメンド | あなたの会社に合った補助金を自動で見つけます | 横文字排除 |
++| わずか60秒で完了 | 5つの質問に答えるだけ。約1分で結果が出ます | 具体性 |
++| 今すぐ無料診断！ | まずは無料で診断してみませんか？ | 煽らない |
++| ソリューションを提供 | お手伝いをします | 人間の言葉で |
++| 採択確率○○% | 難易度: ★☆☆（比較的申請しやすい） | 確率は約束できない |
++| 御社のDX推進を支援 | 業務効率化のための補助金もあります | DX禁止 |
++
++### 使用推奨ワード
++無料 / 簡単 / 安心 / 専門家 / 実績 / あなたの会社 / まずは / 相談
++
++### 使用禁止ワード
++AI / アルゴリズム / レコメンド / ソリューション / DX / マッチング / 最適化
++「今だけ」「限定」「急いで」「お急ぎください」（煽り系全般）
++
++---
++
++## 7. CTAボタン
++
++### デザイン仕様
++```css
++.cta-button {
++  background-color: #E8772E;
++  color: #FFFFFF;
++  font-family: 'Noto Sans JP', sans-serif;
++  font-weight: 700;
++  font-size: 17px;               /* mobile */
++  padding: 16px 48px;
++  border-radius: 12px;           /* フル角丸にしない。信頼系=8-12px */
++  border: none;
++  cursor: pointer;
++  transition: all 0.2s ease;
++  box-shadow: 0 2px 8px rgba(232,119,46,0.2);
++}
++.cta-button:hover {
++  background-color: #D06A28;
++  box-shadow: 0 4px 16px rgba(232,119,46,0.3);
++  transform: translateY(-1px);   /* 微動のみ。派手にしない */
++}
++```
++
++### ラベル
++```
++✅ "無料で診断する"（メインCTA）
++✅ "補助金を調べてみる"（サブCTA）
++❌ "今すぐスタート！"
++❌ "無料診断はこちら →"
++❌ "Start"
++```
++
++### 配置ルール
++| 位置 | 種類 | 備考 |
++|---|---|---|
++| Hero直下 | プライマリ | 最も目立つ |
++| 安心ポイント直下 | プライマリ | 不安解消→即アクション |
++| フッター直前 | プライマリ | 最終決断ポイント |
++| モバイル画面下部 | 固定バー | スクロールしても常に見える |
++
++- **CTA合計: 3箇所 + モバイル固定1** 
++- 固定バーは背景白 + 薄いtop-shadow。CTAボタン+「無料・1分で完了」テキスト
++
++### shimmer効果（復活・条件付き）
++- Hero直下のメインCTAにのみ適用
++- **1回だけ再生（ループしない）。** ページ表示後2秒後に1回shimmer → 停止
++- shimmerは白の光が左→右に流れるタイプ（幅50%、opacity 0.3）
++- 他のCTAには適用しない（メインCTAだけ特別感を出す）
++
++---
++
++## 8. 信頼要素（士業LP成功パターンから）
++
++### 必須実装（リサーチ結果: 士業LPでCVR に最も影響する要素群）
++
++| 要素 | 実装方法 | 優先度 |
++|---|---|---|
++| 信頼バー（数字3つ） | カウントアップ表示。セクション②に配置 | 最重要 |
++| 行政書士提携の明示 | 「○名の行政書士と提携」バッジ | 最重要 |
++| 「無料」の明示 | ページ内3回以上。Hero/安心ポイント/CTA | 最重要 |
++| 「個人情報不要」の明示 | サブヘッド + 安心ポイント | 最重要（競合との差別化） |
++| 運営会社情報 | フッター | 必須 |
++| プライバシーポリシー | フッターリンク | 必須 |
++| SSL/HTTPSバッジ | 安心ポイント内 or フッター | あれば |
++
++### 将来追加（実績蓄積後）
++| 要素 | タイミング |
++|---|---|
++| お客様の声（テスティモニアル） | 診断実績50件以上 |
++| 担当行政書士のプロフィール写真 | 提携先と合意後 |
++| 導入事例（ストーリー型） | 成功事例3件以上 |
++| メディア掲載実績 | 掲載後 |
++
++### ファーストビューの人物要素
++- **士業LPでは人物写真がCVRに大きく影響**（ZEROラボ、StockSun共通見解）
++- SmartHR/ジョブカン/freee全てHeroに人物がいる。**人物なしのHeroは「しょぼく見える」最大の原因**
++- 初期は**高品質イラスト（ビジネスパーソン風）で代替** → unDraw / Storyset / Blush 等から選定
++- 提携行政書士の写真が使えるようになったら即差し替え
++
++### Hero に「プロダクトUI」を見せる（必須）
++- SmartHR: ダッシュボード画面のモック
++- ジョブカン: 勤怠管理画面のモック
++- freee: 確定申告画面のモック
++- **うちも診断結果画面のモックアップ（スマホ型フレーム）をHeroに配置する**
++- Figma or スクショベースで作成。実際のUIでなくてOK、「こういう結果が出る」のイメージ図
++- モックアップは**少し傾けて影をつける**（flat配置は安っぽい。perspective mockupにする）
++
++---
++
++## 9. アニメーション
++
++### 方針: 「控えめ」ではなく「上品」。クオリティの高いアニメーションは信頼感を上げる。
++- **「アニメなし」はしょぼく見える原因。** SmartHR/freeeも全セクションにフェードインがある
++- **雑なアニメーション > アニメなし > 上品なアニメーション** の順でダメ
++- Framer Motionで**スムーズなeasing**（ease-out, spring）を使う。linearは機械的で安っぽい
++
++| 要素 | アニメーション | Duration | トリガー |
++|---|---|---|---|
++| セクション表示 | opacity: 0→1（Fade Inのみ） | 0.6s | inView |
++| 信頼バーの数字 | カウントアップ | 1.5s | inView（once） |
++| 診断ステップ | 順番にFade In | 0.5s each | inView, delay 0.15s |
++| 補助金カード | Fade In | 0.4s each | inView, delay 0.1s |
++| FAQ開閉 | height auto + opacity | 0.3s | click |
++| CTA hover | 色変化 + 微shadow + translateY(-1px) | 0.2s | hover |
++| モバイル固定バー | 下からスライド | 0.3s | scroll > 500px |
++
++### OK（品質が高ければ）
++- ✅ Fade In + 軽い translateY(20px)（SmartHR/freeeで使用。自然な登場感）
++- ✅ CTAボタンの shimmer効果（控えめなら。1回だけ、ループしない）
++- ✅ ホバーでカードが浮く（translateY(-4px) + shadow拡大）
++- ✅ 信頼バー背景の微グラデーション（Stripe風。動かない静的グラデ）
++- ✅ スクロールに連動した軽いフェード（intersection observer）
++- ✅ Heroのプロダクトモックに軽いフロート（上下3px、8秒周期）
++
++### NG
++- ❌ Blob装飾 / フローティング絵文字
++- ❌ スクロールジャック
++- ❌ ページ読み込みスプラッシュ
++- ❌ テキストの1文字ずつ表示
++- ❌ 背景全体が動くグラデーション
++- ❌ 過度なパララックス（軽いものはOK）
++
++---
++
++## 10. レイアウト・余白
++
++### 基本設計
++- **コンテンツ最大幅: 960px**（広すぎると読みにくい。1200px不要）
++- **セクション間余白:** 64px(mobile) / 96px(desktop)
++- **カード間余白:** 24px
++- **テキストブロック間余白:** 16px(mobile) / 20px(desktop)
++
++### セクション背景交互配色
++```
++① Hero        → BG Main (#FAFBFC)
++② 信頼バー     → Primary (#1B3A5C) + 白文字 ← ここだけ暗い背景。数字を際立たせる
++③ 共感        → BG Alt (#F5F3EF)
++④ 診断の流れ   → BG Main
++⑤ 安心ポイント  → BG Alt
++⑥ 補助金の例   → BG Main
++⑦ FAQ         → BG Alt
++⑧ CTA        → Primary Light (#E8EDF3)
++```
++
++### カードUI（補助金の例）
++```css
++.subsidy-card {
++  background: #FFFFFF;
++  border: 1px solid #E5E7EB;
++  border-radius: 12px;
++  padding: 24px;
++  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
++  transition: box-shadow 0.2s;
++}
++.subsidy-card:hover {
++  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
++}
++```
++
++---
++
++## 11. モバイル対応
++
++- **モバイルファースト必須。** トラフィック60%以上がスマホ想定
++- タップ領域: 最低 48px × 48px
++- フォーム input height: 48px以上。ラベルは上配置
++- 横スクロール禁止
++- テーブル → モバイルではカード表示に変換
++- **固定CTAバー:** 画面下部に常時表示。高さ64px。背景白。影あり
++
++### ブレークポイント
++| 名前 | 幅 |
++|---|---|
++| mobile | < 768px |
++| tablet | 768px - 1024px |
++| desktop | > 1024px |
++
++---
++
++## 12. 診断フォームUI（LP内の最重要パーツ）
++
++### 設計原則
++- **質問数: 5問以内**（競合は6問以上→短い方が完了率高い）
++- **個人情報は聞かない**（名前・電話番号・メール不要で結果表示）
++- **プログレスバー表示**（「あと○問」を常に見せる）
++- **1画面1問**（複数問を1画面に詰め込まない）
++
++### 質問の流れ
++```
++Q1. 業種を選んでください（プルダウン or カード選択）
++Q2. 従業員数を教えてください（選択肢4つ）
++Q3. 年間売上の規模を教えてください（選択肢4つ）
++Q4. 興味のある分野を選んでください（複数選択可）
++    □ 設備投資  □ IT導入  □ 人材採用・育成  □ 販路拡大  □ 事業転換
++Q5. 所在地（都道府県）を選んでください
++```
++
++### フォームUIスタイル
++- 選択肢はボタン型（ラジオボタンの見た目ではなく、タップしやすいカード型）
++- 選択済み: Primary色の枠線 + 薄いPrimary Light背景
++- 未選択: Border色の枠線
++- 戻るボタン: テキストリンク（「← 前の質問に戻る」）
++- 次へボタン: Primary色（Accent色はCTAのみ）
++
++### 結果画面
++- 該当する補助金をカード表示
++- 各カードに「補助金名 / 最大金額 / 補助率 / 難易度」
++- 下部に**LINE登録CTA**（「詳しい情報をLINEでお届けします」）
++- LINE登録がゲーティングポイント。結果概要は無料、詳細はLINE登録後
++
++---
++
++## 13. 技術スタック
++
++既存構成を維持:
++- **Next.js 14** (App Router) + TypeScript
++- **Tailwind CSS**
++- **Framer Motion**（控えめに使用）
++- **Railway** デプロイ
++
++### コンポーネント分割（必須。現状の1ファイル490行を分解）
++```
++components/
++├── layout/
++│   ├── Header.tsx
++│   └── Footer.tsx
++├── sections/
++│   ├── Hero.tsx
++│   ├── TrustBar.tsx        （信頼バー: 実績数字）
++│   ├── PainPoints.tsx      （共感: こんなお悩み）
++│   ├── Steps.tsx           （診断の流れ: 3ステップ）
++│   ├── WhyTrust.tsx        （安心ポイント）
++│   ├── SubsidyExamples.tsx （補助金の例: カード3-4枚）
++│   ├── FAQ.tsx             （よくある質問）
++│   └── CTASection.tsx      （最終CTA）
++├── ui/
++│   ├── CTAButton.tsx       （共通CTAボタン）
++│   ├── CountUp.tsx         （カウントアップ）
++│   ├── SectionWrapper.tsx  （余白・背景色の統一管理）
++│   ├── SubsidyCard.tsx     （補助金カード）
++│   └── MobileCTABar.tsx    （モバイル固定CTA）
++└── diagnosis/
++    ├── DiagnosisFlow.tsx   （診断フロー全体管理）
++    ├── QuestionCard.tsx    （質問UI）
++    ├── ProgressBar.tsx     （プログレスバー）
++    └── ResultScreen.tsx    （結果画面）
++```
++
++---
++
++## 14. 計測（必須）
++
++### GA4イベント設計
++| イベント名 | トリガー | パラメータ |
++|---|---|---|
++| `page_view` | LP表示 | — |
++| `scroll_depth` | 25% / 50% / 75% / 100% | `percent` |
++| `cta_click` | CTAボタンクリック | `location`（hero/trust/footer/mobile_bar） |
++| `diagnosis_start` | 診断開始（Q1表示） | — |
++| `diagnosis_progress` | 各質問回答 | `question_number` |
++| `diagnosis_complete` | 結果表示 | `subsidies_matched`（該当件数） |
++| `diagnosis_abandon` | 途中離脱 | `last_question` |
++| `line_register_click` | LINE登録ボタンクリック | — |
++| `faq_open` | FAQ展開 | `question_id` |
++
++### GTM設定
++- GA4 + GTMタグ埋め込み
++- カスタムイベントはdataLayerで送信
++
++---
++
++## 15. SEO / OGP
++
++### meta タグ
++```html
++<title>【無料】補助金診断 | あなたの会社が使える補助金を1分で</title>
++<meta name="description" content="5つの質問に答えるだけで、あなたの会社が申請できる補助金が分かります。個人情報の入力不要。行政書士監修の無料診断ツール。" />
++```
++
++### OGP
++```html
++<meta property="og:title" content="あなたの会社が使える補助金、1分で見つかります" />
++<meta property="og:description" content="個人情報不要の無料診断。行政書士が監修。" />
++<meta property="og:image" content="/ogp.png" />  <!-- 1200x630px -->
++<meta property="og:type" content="website" />
++<meta name="twitter:card" content="summary_large_image" />
++```
++
++### OGP画像の設計
++- 紺背景 + 白文字でヘッドラインを表示
++- 「無料」「1分」「行政書士監修」のバッジ
++- 過度な装飾なし
++
++---
++
++## 16. パフォーマンス目標
++
++| 指標 | 目標値 |
++|---|---|
++| LCP (Largest Contentful Paint) | < 2.5秒 |
++| FID (First Input Delay) | < 100ms |
++| CLS (Cumulative Layout Shift) | < 0.1 |
++| Lighthouse Performance | > 90 |
++
++### 実装
++- 画像: WebP + next/image で自動最適化
++- フォント: next/font でセルフホスト（Google Fonts CDNへのリクエスト削減）
++- Framer Motion: 必要なセクションだけdynamic import
++- scroll-behavior: smooth（CSS）
++
++---
++
++## 17. リリース前チェックリスト
++
++### デザイン
++- [ ] 本文フォントサイズ16px以上
++- [ ] 行間1.8以上
++- [ ] Accent色（オレンジ）がCTAボタン以外に使われていない
++- [ ] セクション背景が交互配色になっている
++- [ ] 人物イラスト or 写真がHeroにある
++
++### 機能
++- [ ] CTA 3箇所 + モバイル固定バー
++- [ ] モバイル固定CTAバー動作確認
++- [ ] 診断フォーム: 5問で完了
++- [ ] 診断結果: 個人情報なしで表示される
++- [ ] LINE登録導線が機能する
++- [ ] FAQ アコーディオン動作
++
++### SEO / 計測
++- [ ] OGP設定（タイトル・説明・画像）
++- [ ] favicon設定
++- [ ] GA4/GTM全イベント発火確認
++- [ ] robots.txt / sitemap.xml
++
++### パフォーマンス
++- [ ] Lighthouse Performance > 90
++- [ ] LCP < 2.5秒
++- [ ] 画像WebP化
++
++### コンテンツ
++- [ ] 横文字・専門用語ゼロ確認
++- [ ] 「無料」が3回以上ページ内に出現
++- [ ] 全テキスト日本語校正
++- [ ] プライバシーポリシーページ
++- [ ] 特定商取引法ページ
++
++---
++
++## 18. A/Bテスト計画（リリース後）
++
++統計: A/Bテストの87.5%は有意な差が出ない。テストは仮説を絞って1つずつ。
++
++| 優先度 | テスト対象 | 仮説 |
++|---|---|---|
++| 1 | ヘッドラインの文言 | 「1分で見つかる」vs「5つの質問だけ」どちらがCTR高いか |
++| 2 | CTAボタンの色 | オレンジ vs 緑 |
++| 3 | 診断結果のゲーティング位置 | 全結果無料 vs 上位3件無料+残りはLINE登録 |
++| 4 | Hero の人物要素 | イラスト vs 写真（提携先の写真が使えるようになったら） |
+diff --git a/frontend/src/app/globals.css b/frontend/src/app/globals.css
+index a2dc41e..100366d 100644
+--- a/frontend/src/app/globals.css
++++ b/frontend/src/app/globals.css
+@@ -1,26 +1,45 @@
+ @import "tailwindcss";
+ 
+ :root {
+-  --background: #ffffff;
+-  --foreground: #171717;
++  --primary: #1B3A5C;
++  --primary-light: #E8EDF3;
++  --secondary: #2E7D5B;
++  --secondary-light: #E6F4ED;
++  --accent: #E8772E;
++  --accent-hover: #D06A28;
++  --bg-main: #FAFBFC;
++  --bg-alt: #F5F3EF;
++  --text-main: #2D2D2D;
++  --text-sub: #6B7280;
++  --border: #E5E7EB;
+ }
+ 
+-@theme inline {
+-  --color-background: var(--background);
+-  --color-foreground: var(--foreground);
+-  --font-sans: var(--font-geist-sans);
+-  --font-mono: var(--font-geist-mono);
++body {
++  background: var(--bg-main);
++  color: var(--text-main);
++  font-feature-settings: "palt" 1;
++  line-height: 1.8;
++  letter-spacing: 0.02em;
++  -webkit-font-smoothing: antialiased;
+ }
+ 
+-@media (prefers-color-scheme: dark) {
+-  :root {
+-    --background: #0a0a0a;
+-    --foreground: #ededed;
+-  }
++html {
++  scroll-behavior: smooth;
+ }
+ 
+-body {
+-  background: var(--background);
+-  color: var(--foreground);
+-  font-family: Arial, Helvetica, sans-serif;
++/* shimmer for CTA */
++@keyframes shimmer {
++  0% { transform: translateX(-100%); }
++  100% { transform: translateX(100%); }
++}
++
++.cta-shimmer::after {
++  content: '';
++  position: absolute;
++  top: 0;
++  left: 0;
++  width: 50%;
++  height: 100%;
++  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
++  animation: shimmer 1.5s ease-out 2s 1;
+ }
+diff --git a/frontend/src/app/layout.tsx b/frontend/src/app/layout.tsx
+index ae2ad4e..cd96e0b 100644
+--- a/frontend/src/app/layout.tsx
++++ b/frontend/src/app/layout.tsx
+@@ -1,9 +1,34 @@
+ import type { Metadata } from "next";
++import { Noto_Sans_JP, Inter } from "next/font/google";
+ import "./globals.css";
+ 
++const notoSansJP = Noto_Sans_JP({
++  subsets: ["latin"],
++  weight: ["400", "500", "600", "700"],
++  variable: "--font-noto",
++  display: "swap",
++});
++
++const inter = Inter({
++  subsets: ["latin"],
++  weight: ["400", "700"],
++  variable: "--font-inter",
++  display: "swap",
++});
++
+ export const metadata: Metadata = {
+-  title: "補助金診断ツール",
+-  description: "中小企業向け補助金マッチング・診断ツール",
++  title: "【無料】補助金診断 | あなたの会社が使える補助金を1分で",
++  description:
++    "5つの質問に答えるだけで、あなたの会社が申請できる補助金が分かります。個人情報の入力不要。行政書士監修の無料診断ツール。",
++  openGraph: {
++    title: "あなたの会社が使える補助金、1分で見つかります",
++    description: "個人情報不要の無料診断。行政書士が監修。",
++    type: "website",
++    locale: "ja_JP",
++  },
++  twitter: {
++    card: "summary_large_image",
++  },
+ };
+ 
+ export default function RootLayout({
+@@ -12,8 +37,8 @@ export default function RootLayout({
+   children: React.ReactNode;
+ }>) {
+   return (
+-    <html lang="ja">
+-      <body>{children}</body>
++    <html lang="ja" className={`${notoSansJP.variable} ${inter.variable}`}>
++      <body className="font-[family-name:var(--font-noto)]">{children}</body>
+     </html>
+   );
+ }
+diff --git a/frontend/src/app/page.tsx b/frontend/src/app/page.tsx
+index 2d975c3..c0136cc 100644
+--- a/frontend/src/app/page.tsx
++++ b/frontend/src/app/page.tsx
+@@ -1,419 +1,29 @@
+-"use client";
+-
+-import Link from "next/link";
+-import { motion, useInView } from "framer-motion";
+-import { useRef, useEffect, useState } from "react";
+-
+-// カウントアップアニメーション
+-function CountUp({ end, duration = 2, suffix = "" }: { end: number; duration?: number; suffix?: string }) {
+-  const [count, setCount] = useState(0);
+-  const ref = useRef<HTMLSpanElement>(null);
+-  const inView = useInView(ref, { once: true });
+-
+-  useEffect(() => {
+-    if (!inView) return;
+-    let start = 0;
+-    const step = end / (duration * 60);
+-    const timer = setInterval(() => {
+-      start += step;
+-      if (start >= end) {
+-        setCount(end);
+-        clearInterval(timer);
+-      } else {
+-        setCount(Math.floor(start));
+-      }
+-    }, 1000 / 60);
+-    return () => clearInterval(timer);
+-  }, [inView, end, duration]);
+-
+-  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+-}
+-
+-// フェードインアニメーション
+-function FadeIn({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+-  return (
+-    <motion.div
+-      initial={{ opacity: 0, y: 30 }}
+-      whileInView={{ opacity: 1, y: 0 }}
+-      viewport={{ once: true }}
+-      transition={{ duration: 0.6, delay }}
+-    >
+-      {children}
+-    </motion.div>
+-  );
+-}
++import Header from "@/components/layout/Header";
++import Hero from "@/components/sections/Hero";
++import TrustBar from "@/components/sections/TrustBar";
++import PainPoints from "@/components/sections/PainPoints";
++import Steps from "@/components/sections/Steps";
++import WhyTrust from "@/components/sections/WhyTrust";
++import SubsidyExamples from "@/components/sections/SubsidyExamples";
++import FAQ from "@/components/sections/FAQ";
++import CTASection from "@/components/sections/CTASection";
++import Footer from "@/components/layout/Footer";
++import MobileCTABar from "@/components/ui/MobileCTABar";
+ 
+ export default function Home() {
+   return (
+-    <main className="min-h-screen bg-white">
+-      {/* ファーストビュー */}
+-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 text-white py-24 px-4">
+-        {/* 背景パーティクル */}
+-        <div className="absolute inset-0 overflow-hidden">
+-          {[...Array(20)].map((_, i) => (
+-            <motion.div
+-              key={i}
+-              className="absolute w-2 h-2 bg-white/10 rounded-full"
+-              style={{
+-                left: `${Math.random() * 100}%`,
+-                top: `${Math.random() * 100}%`,
+-              }}
+-              animate={{
+-                y: [0, -30, 0],
+-                opacity: [0.1, 0.3, 0.1],
+-              }}
+-              transition={{
+-                duration: 3 + Math.random() * 2,
+-                repeat: Infinity,
+-                delay: Math.random() * 2,
+-              }}
+-            />
+-          ))}
+-        </div>
+-
+-        <div className="max-w-4xl mx-auto text-center relative z-10">
+-          <motion.div
+-            initial={{ opacity: 0, y: -10 }}
+-            animate={{ opacity: 1, y: 0 }}
+-            transition={{ duration: 0.5 }}
+-          >
+-            <span className="inline-block bg-white/20 backdrop-blur-sm text-sm font-medium px-4 py-1.5 rounded-full mb-6">
+-              🏛️ 行政書士監修 × AI診断
+-            </span>
+-          </motion.div>
+-
+-          <motion.h1
+-            className="text-4xl sm:text-6xl font-extrabold mb-6 leading-tight tracking-tight"
+-            initial={{ opacity: 0, y: 20 }}
+-            animate={{ opacity: 1, y: 0 }}
+-            transition={{ duration: 0.6, delay: 0.1 }}
+-          >
+-            たった30秒で<br />
+-            <span className="text-yellow-300">最大1,500万円</span>の<br className="sm:hidden" />
+-            補助金が見つかる
+-          </motion.h1>
+-
+-          <motion.p
+-            className="text-lg sm:text-xl opacity-90 mb-10 leading-relaxed"
+-            initial={{ opacity: 0 }}
+-            animate={{ opacity: 1 }}
+-            transition={{ duration: 0.6, delay: 0.3 }}
+-          >
+-            あなたの会社が使える補助金を無料で診断。<br className="hidden sm:block" />
+-            面倒な調査は不要。選択するだけで完了します。
+-          </motion.p>
+-
+-          <motion.div
+-            initial={{ opacity: 0, scale: 0.9 }}
+-            animate={{ opacity: 1, scale: 1 }}
+-            transition={{ duration: 0.5, delay: 0.5 }}
+-          >
+-            <Link
+-              href="/diagnosis"
+-              className="inline-block bg-yellow-400 text-gray-900 font-bold text-lg px-12 py-5 rounded-full shadow-2xl hover:shadow-yellow-400/30 transition-all hover:scale-105 hover:bg-yellow-300"
+-            >
+-              無料で診断する（30秒）
+-            </Link>
+-            <p className="text-sm opacity-70 mt-4">※ 登録不要・完全無料</p>
+-          </motion.div>
+-        </div>
+-      </section>
+-
+-      {/* 実績バー */}
+-      <section className="py-8 px-4 bg-white border-b">
+-        <div className="max-w-4xl mx-auto">
+-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+-            <FadeIn>
+-              <div>
+-                <p className="text-3xl sm:text-4xl font-extrabold text-blue-600">
+-                  <CountUp end={8} duration={1} suffix="種類" />
+-                </p>
+-                <p className="text-sm text-gray-500 mt-1">対応補助金</p>
+-              </div>
+-            </FadeIn>
+-            <FadeIn delay={0.1}>
+-              <div>
+-                <p className="text-3xl sm:text-4xl font-extrabold text-blue-600">
+-                  <CountUp end={1500} duration={1.5} suffix="万円" />
+-                </p>
+-                <p className="text-sm text-gray-500 mt-1">最大受給額</p>
+-              </div>
+-            </FadeIn>
+-            <FadeIn delay={0.2}>
+-              <div>
+-                <p className="text-3xl sm:text-4xl font-extrabold text-blue-600">
+-                  ¥0
+-                </p>
+-                <p className="text-sm text-gray-500 mt-1">診断料金</p>
+-              </div>
+-            </FadeIn>
+-          </div>
+-        </div>
+-      </section>
+-
+-      {/* 悩み共感 */}
+-      <section className="py-20 px-4 bg-gray-50">
+-        <div className="max-w-4xl mx-auto">
+-          <FadeIn>
+-            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4">
+-              こんなお悩みありませんか？
+-            </h2>
+-            <p className="text-gray-500 text-center mb-12">
+-              中小企業の約70%が使える補助金を見逃しています
+-            </p>
+-          </FadeIn>
+-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+-            {[
+-              {
+-                emoji: "🤔",
+-                title: "何が対象か分からない",
+-                desc: "補助金は種類が多すぎて、自分の会社がどれに該当するのか調べる時間がない",
+-              },
+-              {
+-                emoji: "📄",
+-                title: "申請が面倒そう",
+-                desc: "書類作成が複雑で、本業に追われて手が回らない。過去に断念した経験も",
+-              },
+-              {
+-                emoji: "💰",
+-                title: "いくらもらえるか不明",
+-                desc: "補助金の存在は知っていても、自社でいくら受給できるのか分からない",
+-              },
+-            ].map((item, i) => (
+-              <FadeIn key={item.title} delay={i * 0.1}>
+-                <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow text-center border border-gray-100">
+-                  <span className="text-5xl mb-4 block">{item.emoji}</span>
+-                  <h3 className="font-bold text-lg text-gray-900 mb-3">{item.title}</h3>
+-                  <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+-                </div>
+-              </FadeIn>
+-            ))}
+-          </div>
+-        </div>
+-      </section>
+-
+-      {/* サービス説明 3ステップ */}
+-      <section className="py-20 px-4 bg-white">
+-        <div className="max-w-4xl mx-auto">
+-          <FadeIn>
+-            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4">
+-              かんたん3ステップ
+-            </h2>
+-            <p className="text-gray-500 text-center mb-14">
+-              補助金AIが最適な補助金をマッチングします
+-            </p>
+-          </FadeIn>
+-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
+-            {[
+-              {
+-                step: "1",
+-                title: "30秒で診断",
+-                desc: "業種・従業員数など基本情報を選択するだけ。入力は一切不要",
+-                icon: "📋",
+-                color: "from-blue-500 to-blue-600",
+-              },
+-              {
+-                step: "2",
+-                title: "結果を確認",
+-                desc: "対象の補助金・受給目安額・難易度が一覧で表示されます",
+-                icon: "📊",
+-                color: "from-green-500 to-green-600",
+-              },
+-              {
+-                step: "3",
+-                title: "LINEで相談",
+-                desc: "行政書士が申請をサポート。書類作成から申請まで全ておまかせ",
+-                icon: "💬",
+-                color: "from-purple-500 to-purple-600",
+-              },
+-            ].map((item, i) => (
+-              <FadeIn key={item.step} delay={i * 0.15}>
+-                <div className="text-center">
+-                  <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-3xl mx-auto mb-5 shadow-lg`}>
+-                    {item.icon}
+-                  </div>
+-                  <div className="text-xs font-bold text-gray-400 mb-2">STEP {item.step}</div>
+-                  <h3 className="font-bold text-xl text-gray-900 mb-3">{item.title}</h3>
+-                  <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+-                </div>
+-              </FadeIn>
+-            ))}
+-          </div>
+-        </div>
+-      </section>
+-
+-      {/* 中間CTA */}
+-      <section className="py-12 px-4 bg-blue-50">
+-        <div className="max-w-2xl mx-auto text-center">
+-          <FadeIn>
+-            <p className="text-gray-700 font-medium mb-4">まずは30秒の無料診断から</p>
+-            <Link
+-              href="/diagnosis"
+-              className="inline-block bg-blue-600 text-white font-bold text-lg px-10 py-4 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 hover:bg-blue-700"
+-            >
+-              無料で診断する
+-            </Link>
+-          </FadeIn>
+-        </div>
+-      </section>
+-
+-      {/* 信頼要素 */}
+-      <section className="py-20 px-4 bg-white">
+-        <div className="max-w-4xl mx-auto">
+-          <FadeIn>
+-            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4">
+-              選ばれる理由
+-            </h2>
+-            <p className="text-gray-500 text-center mb-14">
+-              安心・安全にご利用いただける仕組みを整えています
+-            </p>
+-          </FadeIn>
+-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+-            {[
+-              {
+-                icon: "🏛️",
+-                title: "行政書士が監修・対応",
+-                desc: "2026年行政書士法改正に完全対応。国家資格者が申請書類を作成・チェックします",
+-                badge: "法令遵守",
+-              },
+-              {
+-                icon: "🔒",
+-                title: "安心のセキュリティ",
+-                desc: "お客様の情報はSSL暗号化で保護。第三者への提供は一切ありません",
+-                badge: "SSL対応",
+-              },
+-              {
+-                icon: "⚡",
+-                title: "完全無料・30秒",
+-                desc: "診断は何度でも無料。費用が発生するのは申請を依頼した場合のみです",
+-                badge: "無料",
+-              },
+-            ].map((item, i) => (
+-              <FadeIn key={item.title} delay={i * 0.1}>
+-                <div className="bg-gray-50 rounded-2xl p-8 text-center border border-gray-100 hover:border-blue-200 transition-colors relative">
+-                  <span className="absolute top-4 right-4 text-xs bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full">
+-                    {item.badge}
+-                  </span>
+-                  <span className="text-4xl mb-4 block">{item.icon}</span>
+-                  <h3 className="font-bold text-lg text-gray-900 mb-3">{item.title}</h3>
+-                  <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+-                </div>
+-              </FadeIn>
+-            ))}
+-          </div>
+-        </div>
+-      </section>
+-
+-      {/* FAQ */}
+-      <section className="py-20 px-4 bg-gray-50">
+-        <div className="max-w-3xl mx-auto">
+-          <FadeIn>
+-            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-12">
+-              よくあるご質問
+-            </h2>
+-          </FadeIn>
+-          <div className="space-y-4">
+-            {[
+-              {
+-                q: "本当に無料ですか？",
+-                a: "はい、診断は完全無料です。費用が発生するのは、診断後に行政書士への申請サポートを依頼された場合のみです。",
+-              },
+-              {
+-                q: "どんな補助金に対応していますか？",
+-                a: "ものづくり補助金、IT導入補助金、小規模事業者持続化補助金、事業承継補助金など主要8種類の補助金に対応しています。",
+-              },
+-              {
+-                q: "個人事業主でも利用できますか？",
+-                a: "はい、個人事業主の方もご利用いただけます。小規模事業者持続化補助金など、個人事業主が対象の補助金も多数あります。",
+-              },
+-              {
+-                q: "申請書類は自分で作成する必要がありますか？",
+-                a: "いいえ、提携行政書士が書類作成から申請まで全て対応します。お客様は必要な情報をお伝えいただくだけです。",
+-              },
+-              {
+-                q: "補助金が採択されなかった場合、費用はかかりますか？",
+-                a: "料金体系は提携行政書士との契約によりますが、成功報酬型のプランもご用意しています。詳しくはLINEでお問い合わせください。",
+-              },
+-            ].map((item, i) => (
+-              <FadeIn key={i} delay={i * 0.05}>
+-                <details className="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+-                  <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors">
+-                    <span className="font-medium text-gray-900">{item.q}</span>
+-                    <span className="text-gray-400 group-open:rotate-180 transition-transform ml-4">▼</span>
+-                  </summary>
+-                  <div className="px-6 pb-6 text-sm text-gray-600 leading-relaxed">
+-                    {item.a}
+-                  </div>
+-                </details>
+-              </FadeIn>
+-            ))}
+-          </div>
+-        </div>
+-      </section>
+-
+-      {/* 最終CTA */}
+-      <section className="relative py-24 px-4 bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 text-white text-center overflow-hidden">
+-        <div className="absolute inset-0 overflow-hidden">
+-          {[...Array(15)].map((_, i) => (
+-            <motion.div
+-              key={i}
+-              className="absolute w-1.5 h-1.5 bg-white/10 rounded-full"
+-              style={{
+-                left: `${Math.random() * 100}%`,
+-                top: `${Math.random() * 100}%`,
+-              }}
+-              animate={{
+-                y: [0, -20, 0],
+-                opacity: [0.1, 0.25, 0.1],
+-              }}
+-              transition={{
+-                duration: 4 + Math.random() * 2,
+-                repeat: Infinity,
+-                delay: Math.random() * 3,
+-              }}
+-            />
+-          ))}
+-        </div>
+-        <div className="max-w-2xl mx-auto relative z-10">
+-          <FadeIn>
+-            <h2 className="text-3xl sm:text-4xl font-extrabold mb-6 leading-tight">
+-              あなたの会社が使える補助金、<br />今すぐ確認しませんか？
+-            </h2>
+-            <p className="text-lg opacity-90 mb-10">
+-              無料・30秒・登録不要で対象の補助金がわかります
+-            </p>
+-            <Link
+-              href="/diagnosis"
+-              className="inline-block bg-yellow-400 text-gray-900 font-bold text-xl px-14 py-5 rounded-full shadow-2xl hover:shadow-yellow-400/30 transition-all hover:scale-105 hover:bg-yellow-300"
+-            >
+-              無料で診断する（30秒）
+-            </Link>
+-          </FadeIn>
+-        </div>
+-      </section>
+-
+-      {/* フッター */}
+-      <footer className="py-10 px-4 bg-gray-900 text-gray-400">
+-        <div className="max-w-4xl mx-auto">
+-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+-            <div>
+-              <p className="font-bold text-white text-lg">補助金AI</p>
+-              <p className="text-xs mt-1">© 2026 補助金AI. All rights reserved.</p>
+-            </div>
+-            <div className="flex gap-6 text-sm">
+-              <Link href="/privacy" className="hover:text-white transition-colors">
+-                プライバシーポリシー
+-              </Link>
+-              <Link href="/terms" className="hover:text-white transition-colors">
+-                利用規約
+-              </Link>
+-            </div>
+-          </div>
+-          <p className="text-xs text-center mt-6 text-gray-500">
+-            本サービスの補助金申請書類作成は提携行政書士が行います
+-          </p>
+-        </div>
+-      </footer>
++    <main className="min-h-screen">
++      <Header />
++      <Hero />
++      <TrustBar />
++      <PainPoints />
++      <Steps />
++      <WhyTrust />
++      <SubsidyExamples />
++      <FAQ />
++      <CTASection />
++      <Footer />
++      <MobileCTABar />
+     </main>
+   );
+ }
+diff --git a/frontend/src/components/layout/Footer.tsx b/frontend/src/components/layout/Footer.tsx
+new file mode 100644
+index 0000000..519112a
+--- /dev/null
++++ b/frontend/src/components/layout/Footer.tsx
+@@ -0,0 +1,27 @@
++import Link from "next/link";
++
++export default function Footer() {
++  return (
++    <footer className="py-10 px-4 bg-[#1B3A5C] text-white/70">
++      <div className="max-w-[960px] mx-auto">
++        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
++          <div>
++            <p className="font-bold text-white text-lg">補助金診断</p>
++            <p className="text-xs mt-1">© 2026 補助金診断. All rights reserved.</p>
++          </div>
++          <div className="flex gap-6 text-sm">
++            <Link href="/privacy" className="hover:text-white transition-colors">
++              プライバシーポリシー
++            </Link>
++            <Link href="/terms" className="hover:text-white transition-colors">
++              利用規約
++            </Link>
++          </div>
++        </div>
++        <p className="text-xs text-center mt-6 text-white/40">
++          本サービスの補助金申請書類作成は提携行政書士が行います
++        </p>
++      </div>
++    </footer>
++  );
++}
+diff --git a/frontend/src/components/layout/Header.tsx b/frontend/src/components/layout/Header.tsx
+new file mode 100644
+index 0000000..d34d0fd
+--- /dev/null
++++ b/frontend/src/components/layout/Header.tsx
+@@ -0,0 +1,21 @@
++"use client";
++
++import Link from "next/link";
++
++export default function Header() {
++  return (
++    <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-[#E5E7EB]">
++      <div className="max-w-[960px] mx-auto flex items-center justify-between px-4 h-16">
++        <Link href="/" className="text-[#1B3A5C] font-bold text-lg">
++          補助金診断
++        </Link>
++        <Link
++          href="/diagnosis"
++          className="bg-[#E8772E] text-white text-sm font-bold px-6 py-2.5 rounded-lg hover:bg-[#D06A28] transition-colors"
++        >
++          無料で診断する
++        </Link>
++      </div>
++    </header>
++  );
++}
+diff --git a/frontend/src/components/sections/CTASection.tsx b/frontend/src/components/sections/CTASection.tsx
+new file mode 100644
+index 0000000..f7c5a5b
+--- /dev/null
++++ b/frontend/src/components/sections/CTASection.tsx
+@@ -0,0 +1,29 @@
++"use client";
++
++import FadeIn from "@/components/ui/FadeIn";
++import CTAButton from "@/components/ui/CTAButton";
++
++export default function CTASection() {
++  return (
++    <section className="py-20 sm:py-28 px-4 bg-[#E8EDF3]">
++      <div className="max-w-[640px] mx-auto text-center">
++        <FadeIn>
++          <h2 className="text-[22px] sm:text-[32px] font-bold text-[#1B3A5C] leading-[1.4] mb-5">
++            あなたの会社が使える補助金、
++            <br />
++            まずは無料で確認してみませんか？
++          </h2>
++          <p className="text-[16px] text-[#6B7280] mb-10 leading-[1.8]">
++            5つの質問に答えるだけ。約1分で結果が出ます。
++            <br />
++            個人情報の入力は不要です。
++          </p>
++          <CTAButton label="無料で診断する" size="large" />
++          <p className="text-xs text-[#6B7280] mt-5">
++            ※ 登録不要・完全無料・営業電話なし
++          </p>
++        </FadeIn>
++      </div>
++    </section>
++  );
++}
+diff --git a/frontend/src/components/sections/FAQ.tsx b/frontend/src/components/sections/FAQ.tsx
+new file mode 100644
+index 0000000..6cf4dad
+--- /dev/null
++++ b/frontend/src/components/sections/FAQ.tsx
+@@ -0,0 +1,57 @@
++"use client";
++
++import FadeIn from "@/components/ui/FadeIn";
++
++const faqs = [
++  {
++    q: "本当に無料ですか？",
++    a: "はい、診断は完全無料です。費用が発生するのは、診断後に行政書士への申請サポートを依頼された場合のみです。",
++  },
++  {
++    q: "どんな補助金に対応していますか？",
++    a: "ものづくり補助金、IT導入補助金、小規模事業者持続化補助金、事業承継補助金など主要8種類の補助金に対応しています。",
++  },
++  {
++    q: "個人事業主でも利用できますか？",
++    a: "はい、個人事業主の方もご利用いただけます。小規模事業者持続化補助金など、個人事業主が対象の補助金も多数あります。",
++  },
++  {
++    q: "個人情報は必要ですか？",
++    a: "診断には名前・電話番号・メールアドレスなどの個人情報は一切必要ありません。安心してご利用ください。",
++  },
++  {
++    q: "申請書類は自分で作成する必要がありますか？",
++    a: "いいえ。提携行政書士が書類を作成します。お客様には必要な情報のヒアリング（約15分）にご協力いただくだけです。",
++  },
++];
++
++export default function FAQ() {
++  return (
++    <section className="py-16 sm:py-24 px-4 bg-[#F5F3EF]">
++      <div className="max-w-[720px] mx-auto">
++        <FadeIn>
++          <h2 className="text-[22px] sm:text-[32px] font-bold text-center text-[#1B3A5C] mb-12">
++            よくあるご質問
++          </h2>
++        </FadeIn>
++        <div className="space-y-3">
++          {faqs.map((item, i) => (
++            <FadeIn key={i} delay={i * 0.05}>
++              <details className="group bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
++                <summary className="flex items-center justify-between p-5 sm:p-6 cursor-pointer hover:bg-[#FAFBFC] transition-colors">
++                  <span className="font-medium text-[#2D2D2D] text-[16px] pr-4">{item.q}</span>
++                  <span className="text-[#6B7280] group-open:rotate-180 transition-transform duration-300 shrink-0">
++                    ▼
++                  </span>
++                </summary>
++                <div className="px-5 sm:px-6 pb-5 sm:pb-6 text-[15px] text-[#6B7280] leading-[1.8]">
++                  {item.a}
++                </div>
++              </details>
++            </FadeIn>
++          ))}
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/frontend/src/components/sections/Hero.tsx b/frontend/src/components/sections/Hero.tsx
+new file mode 100644
+index 0000000..1532ff0
+--- /dev/null
++++ b/frontend/src/components/sections/Hero.tsx
+@@ -0,0 +1,119 @@
++"use client";
++
++import { motion } from "framer-motion";
++import CTAButton from "@/components/ui/CTAButton";
++
++export default function Hero() {
++  return (
++    <section className="relative pt-28 pb-20 sm:pt-36 sm:pb-28 px-4 bg-[#FAFBFC] overflow-hidden">
++      {/* 背景の微グラデーション装飾 */}
++      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#E8EDF3] rounded-full blur-[120px] opacity-60 -translate-y-1/2 translate-x-1/3" />
++      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#E6F4ED] rounded-full blur-[100px] opacity-40 translate-y-1/2 -translate-x-1/3" />
++
++      <div className="max-w-[960px] mx-auto relative z-10">
++        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
++          {/* テキスト側 */}
++          <div>
++            <motion.div
++              initial={{ opacity: 0, y: 10 }}
++              animate={{ opacity: 1, y: 0 }}
++              transition={{ duration: 0.5 }}
++            >
++              <span className="inline-flex items-center gap-1.5 bg-[#E6F4ED] text-[#2E7D5B] text-sm font-medium px-4 py-1.5 rounded-full mb-6">
++                <span>🏛️</span>
++                行政書士監修・完全無料
++              </span>
++            </motion.div>
++
++            <motion.h1
++              className="text-[28px] sm:text-[42px] font-bold text-[#1B3A5C] leading-[1.3] mb-5"
++              initial={{ opacity: 0, y: 20 }}
++              animate={{ opacity: 1, y: 0 }}
++              transition={{ duration: 0.6, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
++            >
++              あなたの会社が使える
++              <br />
++              <span className="text-[#2E7D5B]">補助金</span>、1分で見つかります
++            </motion.h1>
++
++            <motion.p
++              className="text-[16px] sm:text-[17px] text-[#6B7280] leading-[1.9] mb-8"
++              initial={{ opacity: 0 }}
++              animate={{ opacity: 1 }}
++              transition={{ duration: 0.6, delay: 0.3 }}
++            >
++              5つの質問に答えるだけ。個人情報の入力は不要です。
++              <br className="hidden sm:block" />
++              行政書士が監修した診断で、あなたの会社に合った補助金を見つけます。
++            </motion.p>
++
++            <motion.div
++              initial={{ opacity: 0, y: 10 }}
++              animate={{ opacity: 1, y: 0 }}
++              transition={{ duration: 0.5, delay: 0.5 }}
++              className="flex flex-col sm:flex-row items-start gap-4"
++            >
++              <CTAButton label="無料で診断する" shimmer size="large" />
++              <p className="text-xs text-[#6B7280] mt-2 sm:mt-4">
++                ※ 登録不要・完全無料・営業電話なし
++              </p>
++            </motion.div>
++          </div>
++
++          {/* ビジュアル側: 診断結果モックアップ */}
++          <motion.div
++            className="hidden lg:flex justify-center"
++            initial={{ opacity: 0, x: 30 }}
++            animate={{ opacity: 1, x: 0 }}
++            transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
++          >
++            <motion.div
++              animate={{ y: [0, -6, 0] }}
++              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
++              className="relative"
++            >
++              {/* スマホフレーム */}
++              <div className="w-[280px] bg-white rounded-[32px] shadow-2xl border border-[#E5E7EB] p-4 rotate-[-2deg]">
++                {/* ステータスバー */}
++                <div className="w-20 h-1 bg-[#E5E7EB] rounded-full mx-auto mb-4" />
++                {/* 診断結果モック */}
++                <div className="space-y-3 px-2">
++                  <div className="text-center mb-4">
++                    <p className="text-xs text-[#6B7280]">診断結果</p>
++                    <p className="text-[#1B3A5C] font-bold text-lg">3件の補助金が見つかりました</p>
++                  </div>
++                  {/* カード1 */}
++                  <div className="bg-[#E8EDF3] rounded-xl p-3">
++                    <p className="text-xs font-bold text-[#1B3A5C]">ものづくり補助金</p>
++                    <div className="flex justify-between items-center mt-1">
++                      <p className="text-xs text-[#6B7280]">最大1,250万円</p>
++                      <span className="text-[10px] bg-[#E6F4ED] text-[#2E7D5B] px-2 py-0.5 rounded-full font-medium">適合度 ★★★</span>
++                    </div>
++                  </div>
++                  {/* カード2 */}
++                  <div className="bg-[#E8EDF3] rounded-xl p-3">
++                    <p className="text-xs font-bold text-[#1B3A5C]">IT導入補助金</p>
++                    <div className="flex justify-between items-center mt-1">
++                      <p className="text-xs text-[#6B7280]">最大450万円</p>
++                      <span className="text-[10px] bg-[#E6F4ED] text-[#2E7D5B] px-2 py-0.5 rounded-full font-medium">適合度 ★★★</span>
++                    </div>
++                  </div>
++                  {/* カード3 */}
++                  <div className="bg-[#E8EDF3] rounded-xl p-3">
++                    <p className="text-xs font-bold text-[#1B3A5C]">小規模事業者持続化補助金</p>
++                    <div className="flex justify-between items-center mt-1">
++                      <p className="text-xs text-[#6B7280]">最大200万円</p>
++                      <span className="text-[10px] bg-[#E6F4ED] text-[#2E7D5B] px-2 py-0.5 rounded-full font-medium">適合度 ★★☆</span>
++                    </div>
++                  </div>
++                </div>
++                {/* ホームインジケータ */}
++                <div className="w-24 h-1 bg-[#E5E7EB] rounded-full mx-auto mt-4" />
++              </div>
++            </motion.div>
++          </motion.div>
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/frontend/src/components/sections/PainPoints.tsx b/frontend/src/components/sections/PainPoints.tsx
+new file mode 100644
+index 0000000..0e03ff6
+--- /dev/null
++++ b/frontend/src/components/sections/PainPoints.tsx
+@@ -0,0 +1,49 @@
++"use client";
++
++import FadeIn from "@/components/ui/FadeIn";
++
++const pains = [
++  {
++    icon: "📋",
++    title: "種類が多すぎて分からない",
++    desc: "補助金は3,000種類以上。自分の会社にどれが該当するか調べる時間がない",
++  },
++  {
++    icon: "⏰",
++    title: "申請が面倒で断念した",
++    desc: "書類作成が複雑で、本業に追われて手が回らない。過去に諦めた経験がある",
++  },
++  {
++    icon: "💰",
++    title: "いくらもらえるか見えない",
++    desc: "補助金の存在は知っていても、自社でいくら受給できるか分からず動けない",
++  },
++];
++
++export default function PainPoints() {
++  return (
++    <section className="py-16 sm:py-24 px-4 bg-[#F5F3EF]">
++      <div className="max-w-[960px] mx-auto">
++        <FadeIn>
++          <h2 className="text-[22px] sm:text-[32px] font-bold text-center text-[#1B3A5C] mb-3">
++            こんなお悩みありませんか？
++          </h2>
++          <p className="text-[#6B7280] text-center mb-12 text-[16px]">
++            中小企業の約70%が、使える補助金を見逃しています
++          </p>
++        </FadeIn>
++        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
++          {pains.map((item, i) => (
++            <FadeIn key={item.title} delay={i * 0.1}>
++              <div className="bg-white rounded-xl p-8 border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-200 text-center h-full">
++                <span className="text-4xl mb-5 block">{item.icon}</span>
++                <h3 className="font-bold text-[18px] text-[#2D2D2D] mb-3">{item.title}</h3>
++                <p className="text-[15px] text-[#6B7280] leading-[1.8]">{item.desc}</p>
++              </div>
++            </FadeIn>
++          ))}
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/frontend/src/components/sections/Steps.tsx b/frontend/src/components/sections/Steps.tsx
+new file mode 100644
+index 0000000..98349c9
+--- /dev/null
++++ b/frontend/src/components/sections/Steps.tsx
+@@ -0,0 +1,60 @@
++"use client";
++
++import FadeIn from "@/components/ui/FadeIn";
++
++const steps = [
++  {
++    step: "1",
++    title: "5つの質問に回答",
++    desc: "業種・従業員数など、選択するだけの簡単な質問です。入力は不要です",
++    icon: "📋",
++  },
++  {
++    step: "2",
++    title: "結果をその場で確認",
++    desc: "対象の補助金・受給目安額・難易度がすぐに表示されます",
++    icon: "📊",
++  },
++  {
++    step: "3",
++    title: "興味があれば専門家に相談",
++    desc: "提携行政書士が申請をサポート。まずはLINEで気軽にご相談ください",
++    icon: "👤",
++  },
++];
++
++export default function Steps() {
++  return (
++    <section className="py-16 sm:py-24 px-4 bg-[#FAFBFC]">
++      <div className="max-w-[960px] mx-auto">
++        <FadeIn>
++          <h2 className="text-[22px] sm:text-[32px] font-bold text-center text-[#1B3A5C] mb-3">
++            診断の流れ
++          </h2>
++          <p className="text-[#6B7280] text-center mb-14 text-[16px]">
++            約1分で完了します
++          </p>
++        </FadeIn>
++        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 relative">
++          {/* 接続線（デスクトップのみ） */}
++          <div className="hidden sm:block absolute top-10 left-[20%] right-[20%] h-[2px] bg-[#E5E7EB]" />
++
++          {steps.map((item, i) => (
++            <FadeIn key={item.step} delay={i * 0.15}>
++              <div className="text-center relative">
++                <div className="w-20 h-20 rounded-2xl bg-[#E8EDF3] flex items-center justify-center text-3xl mx-auto mb-5 relative z-10">
++                  {item.icon}
++                </div>
++                <div className="inline-flex items-center gap-1 text-xs font-bold text-[#1B3A5C] bg-[#E8EDF3] px-3 py-1 rounded-full mb-3">
++                  STEP {item.step}
++                </div>
++                <h3 className="font-bold text-[18px] text-[#2D2D2D] mb-3">{item.title}</h3>
++                <p className="text-[15px] text-[#6B7280] leading-[1.8]">{item.desc}</p>
++              </div>
++            </FadeIn>
++          ))}
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/frontend/src/components/sections/SubsidyExamples.tsx b/frontend/src/components/sections/SubsidyExamples.tsx
+new file mode 100644
+index 0000000..5f7bc7b
+--- /dev/null
++++ b/frontend/src/components/sections/SubsidyExamples.tsx
+@@ -0,0 +1,72 @@
++"use client";
++
++import FadeIn from "@/components/ui/FadeIn";
++
++const subsidies = [
++  {
++    name: "ものづくり補助金",
++    maxAmount: "1,250万円",
++    rate: "1/2〜2/3",
++    difficulty: "★★☆",
++    desc: "革新的な製品・サービス開発や、生産プロセスの改善に",
++  },
++  {
++    name: "IT導入補助金",
++    maxAmount: "450万円",
++    rate: "1/2〜3/4",
++    difficulty: "★☆☆",
++    desc: "業務効率化のためのITツール（会計ソフト、受発注システム等）導入に",
++  },
++  {
++    name: "小規模事業者持続化補助金",
++    maxAmount: "200万円",
++    rate: "2/3",
++    difficulty: "★☆☆",
++    desc: "販路開拓や業務効率化の取り組みに。個人事業主も対象",
++  },
++  {
++    name: "事業承継・M&A補助金",
++    maxAmount: "600万円",
++    rate: "1/2〜2/3",
++    difficulty: "★★☆",
++    desc: "事業承継やM&Aに伴う経営革新、事業転換の取り組みに",
++  },
++];
++
++export default function SubsidyExamples() {
++  return (
++    <section className="py-16 sm:py-24 px-4 bg-[#FAFBFC]">
++      <div className="max-w-[960px] mx-auto">
++        <FadeIn>
++          <h2 className="text-[22px] sm:text-[32px] font-bold text-center text-[#1B3A5C] mb-3">
++            対応している補助金の例
++          </h2>
++          <p className="text-[#6B7280] text-center mb-12 text-[16px]">
++            他にも多数の補助金に対応しています
++          </p>
++        </FadeIn>
++        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
++          {subsidies.map((item, i) => (
++            <FadeIn key={item.name} delay={i * 0.1}>
++              <div className="bg-white rounded-xl p-6 border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-200">
++                <div className="flex items-start justify-between mb-3">
++                  <h3 className="font-bold text-[16px] text-[#1B3A5C]">{item.name}</h3>
++                  <span className="text-[11px] bg-[#E6F4ED] text-[#2E7D5B] px-2.5 py-1 rounded-full font-medium shrink-0 ml-2">
++                    難易度 {item.difficulty}
++                  </span>
++                </div>
++                <p className="text-[14px] text-[#6B7280] leading-[1.7] mb-3">{item.desc}</p>
++                <div className="flex gap-4 text-[13px]">
++                  <span className="text-[#2D2D2D]">
++                    最大 <strong className="text-[#1B3A5C]">{item.maxAmount}</strong>
++                  </span>
++                  <span className="text-[#6B7280]">補助率 {item.rate}</span>
++                </div>
++              </div>
++            </FadeIn>
++          ))}
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/frontend/src/components/sections/TrustBar.tsx b/frontend/src/components/sections/TrustBar.tsx
+new file mode 100644
+index 0000000..bd4d6b8
+--- /dev/null
++++ b/frontend/src/components/sections/TrustBar.tsx
+@@ -0,0 +1,39 @@
++"use client";
++
++import CountUp from "@/components/ui/CountUp";
++import FadeIn from "@/components/ui/FadeIn";
++
++export default function TrustBar() {
++  return (
++    <section className="py-10 px-4 bg-gradient-to-r from-[#1B3A5C] to-[#244B73]">
++      <div className="max-w-[960px] mx-auto">
++        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center text-white">
++          <FadeIn>
++            <div>
++              <p className="text-4xl sm:text-5xl font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
++                <CountUp end={8} duration={1} suffix="種類" />
++              </p>
++              <p className="text-sm text-white/60 mt-2">対応補助金</p>
++            </div>
++          </FadeIn>
++          <FadeIn delay={0.1}>
++            <div>
++              <p className="text-4xl sm:text-5xl font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
++                <CountUp end={1500} duration={1.5} suffix="万円" />
++              </p>
++              <p className="text-sm text-white/60 mt-2">最大受給額</p>
++            </div>
++          </FadeIn>
++          <FadeIn delay={0.2}>
++            <div>
++              <p className="text-4xl sm:text-5xl font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
++                ¥0
++              </p>
++              <p className="text-sm text-white/60 mt-2">診断料金</p>
++            </div>
++          </FadeIn>
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/frontend/src/components/sections/WhyTrust.tsx b/frontend/src/components/sections/WhyTrust.tsx
+new file mode 100644
+index 0000000..2aa430b
+--- /dev/null
++++ b/frontend/src/components/sections/WhyTrust.tsx
+@@ -0,0 +1,61 @@
++"use client";
++
++import FadeIn from "@/components/ui/FadeIn";
++import CTAButton from "@/components/ui/CTAButton";
++
++const points = [
++  {
++    icon: "🏛️",
++    title: "行政書士が監修",
++    desc: "国家資格を持つ行政書士と提携。診断ロジックから申請サポートまで専門家が関わっています",
++    badge: "専門家監修",
++  },
++  {
++    icon: "🔒",
++    title: "個人情報の入力不要",
++    desc: "診断に名前・電話番号・メールアドレスは一切不要。安心してお試しいただけます",
++    badge: "登録不要",
++  },
++  {
++    icon: "¥0",
++    title: "完全無料で何度でも",
++    desc: "診断は何度でも無料です。費用が発生するのは申請サポートをご依頼いただいた場合のみです",
++    badge: "無料",
++  },
++];
++
++export default function WhyTrust() {
++  return (
++    <section className="py-16 sm:py-24 px-4 bg-[#F5F3EF]">
++      <div className="max-w-[960px] mx-auto">
++        <FadeIn>
++          <h2 className="text-[22px] sm:text-[32px] font-bold text-center text-[#1B3A5C] mb-3">
++            安心してご利用いただけます
++          </h2>
++          <p className="text-[#6B7280] text-center mb-12 text-[16px]">
++            信頼できる仕組みを整えています
++          </p>
++        </FadeIn>
++        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
++          {points.map((item, i) => (
++            <FadeIn key={item.title} delay={i * 0.1}>
++              <div className="bg-white rounded-xl p-8 text-center border border-[#E5E7EB] hover:border-[#1B3A5C]/20 transition-colors relative h-full">
++                <span className="absolute top-4 right-4 text-[11px] bg-[#E6F4ED] text-[#2E7D5B] font-bold px-2.5 py-1 rounded-full">
++                  {item.badge}
++                </span>
++                <span className="text-4xl mb-5 block">{item.icon}</span>
++                <h3 className="font-bold text-[18px] text-[#2D2D2D] mb-3">{item.title}</h3>
++                <p className="text-[15px] text-[#6B7280] leading-[1.8]">{item.desc}</p>
++              </div>
++            </FadeIn>
++          ))}
++        </div>
++        <FadeIn>
++          <div className="text-center">
++            <CTAButton label="無料で診断する" />
++          </div>
++        </FadeIn>
++      </div>
++    </section>
++  );
++}
+diff --git a/frontend/src/components/ui/CTAButton.tsx b/frontend/src/components/ui/CTAButton.tsx
+new file mode 100644
+index 0000000..02d7955
+--- /dev/null
++++ b/frontend/src/components/ui/CTAButton.tsx
+@@ -0,0 +1,40 @@
++"use client";
++
++import Link from "next/link";
++
++export default function CTAButton({
++  href = "/diagnosis",
++  label = "無料で診断する",
++  shimmer = false,
++  size = "default",
++}: {
++  href?: string;
++  label?: string;
++  shimmer?: boolean;
++  size?: "default" | "large";
++}) {
++  const sizeClasses =
++    size === "large"
++      ? "text-[18px] px-14 py-5"
++      : "text-[17px] px-12 py-4";
++
++  return (
++    <Link
++      href={href}
++      className={`
++        relative inline-block overflow-hidden
++        bg-[#E8772E] text-white font-bold
++        ${sizeClasses}
++        rounded-xl
++        shadow-[0_2px_8px_rgba(232,119,46,0.2)]
++        hover:bg-[#D06A28]
++        hover:shadow-[0_4px_16px_rgba(232,119,46,0.3)]
++        hover:-translate-y-[1px]
++        transition-all duration-200
++        ${shimmer ? "cta-shimmer" : ""}
++      `}
++    >
++      {label}
++    </Link>
++  );
++}
+diff --git a/frontend/src/components/ui/CountUp.tsx b/frontend/src/components/ui/CountUp.tsx
+new file mode 100644
+index 0000000..71699e1
+--- /dev/null
++++ b/frontend/src/components/ui/CountUp.tsx
+@@ -0,0 +1,44 @@
++"use client";
++
++import { useEffect, useRef, useState } from "react";
++import { useInView } from "framer-motion";
++
++export default function CountUp({
++  end,
++  duration = 1.5,
++  suffix = "",
++  prefix = "",
++}: {
++  end: number;
++  duration?: number;
++  suffix?: string;
++  prefix?: string;
++}) {
++  const [count, setCount] = useState(0);
++  const ref = useRef<HTMLSpanElement>(null);
++  const inView = useInView(ref, { once: true });
++
++  useEffect(() => {
++    if (!inView) return;
++    let start = 0;
++    const step = end / (duration * 60);
++    const timer = setInterval(() => {
++      start += step;
++      if (start >= end) {
++        setCount(end);
++        clearInterval(timer);
++      } else {
++        setCount(Math.floor(start));
++      }
++    }, 1000 / 60);
++    return () => clearInterval(timer);
++  }, [inView, end, duration]);
++
++  return (
++    <span ref={ref} style={{ fontFamily: "'Inter', sans-serif" }}>
++      {prefix}
++      {count.toLocaleString()}
++      {suffix}
++    </span>
++  );
++}
+diff --git a/frontend/src/components/ui/FadeIn.tsx b/frontend/src/components/ui/FadeIn.tsx
+new file mode 100644
+index 0000000..cfaee61
+--- /dev/null
++++ b/frontend/src/components/ui/FadeIn.tsx
+@@ -0,0 +1,26 @@
++"use client";
++
++import { motion } from "framer-motion";
++import type { ReactNode } from "react";
++
++export default function FadeIn({
++  children,
++  delay = 0,
++  className = "",
++}: {
++  children: ReactNode;
++  delay?: number;
++  className?: string;
++}) {
++  return (
++    <motion.div
++      initial={{ opacity: 0, y: 20 }}
++      whileInView={{ opacity: 1, y: 0 }}
++      viewport={{ once: true, margin: "-40px" }}
++      transition={{ duration: 0.6, delay, ease: [0.25, 0.1, 0.25, 1] }}
++      className={className}
++    >
++      {children}
++    </motion.div>
++  );
++}
+diff --git a/frontend/src/components/ui/MobileCTABar.tsx b/frontend/src/components/ui/MobileCTABar.tsx
+new file mode 100644
+index 0000000..13721e3
+--- /dev/null
++++ b/frontend/src/components/ui/MobileCTABar.tsx
+@@ -0,0 +1,43 @@
++"use client";
++
++import { useState, useEffect } from "react";
++import { motion, AnimatePresence } from "framer-motion";
++import Link from "next/link";
++
++export default function MobileCTABar() {
++  const [show, setShow] = useState(false);
++
++  useEffect(() => {
++    const handler = () => {
++      setShow(window.scrollY > 500);
++    };
++    window.addEventListener("scroll", handler, { passive: true });
++    return () => window.removeEventListener("scroll", handler);
++  }, []);
++
++  return (
++    <AnimatePresence>
++      {show && (
++        <motion.div
++          initial={{ y: 100 }}
++          animate={{ y: 0 }}
++          exit={{ y: 100 }}
++          transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
++          className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-white border-t border-[#E5E7EB] shadow-[0_-2px_10px_rgba(0,0,0,0.08)] px-4 py-3"
++        >
++          <div className="flex items-center justify-between gap-3">
++            <p className="text-[12px] text-[#6B7280] leading-tight">
++              無料・1分で完了
++            </p>
++            <Link
++              href="/diagnosis"
++              className="bg-[#E8772E] text-white text-[15px] font-bold px-6 py-3 rounded-lg hover:bg-[#D06A28] transition-colors shrink-0"
++            >
++              無料で診断する
++            </Link>
++          </div>
++        </motion.div>
++      )}
++    </AnimatePresence>
++  );
++}
+diff --git a/frontend/src/components/ui/SectionWrapper.tsx b/frontend/src/components/ui/SectionWrapper.tsx
+new file mode 100644
+index 0000000..653e941
+--- /dev/null
++++ b/frontend/src/components/ui/SectionWrapper.tsx
+@@ -0,0 +1,24 @@
++import type { ReactNode } from "react";
++
++export default function SectionWrapper({
++  children,
++  bg = "main",
++  className = "",
++}: {
++  children: ReactNode;
++  bg?: "main" | "alt" | "primary" | "primary-light";
++  className?: string;
++}) {
++  const bgMap = {
++    main: "bg-[#FAFBFC]",
++    alt: "bg-[#F5F3EF]",
++    primary: "bg-[#1B3A5C] text-white",
++    "primary-light": "bg-[#E8EDF3]",
++  };
++
++  return (
++    <section className={`py-16 sm:py-24 px-4 ${bgMap[bg]} ${className}`}>
++      <div className="max-w-[960px] mx-auto">{children}</div>
++    </section>
++  );
++}
+-- 
+2.50.1 (Apple Git-155)
+
+

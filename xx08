@@ -1,0 +1,508 @@
+From f1d6896ec42ea38e2cbda6ad4639709bc16a8e61 Mon Sep 17 00:00:00 2001
+From: R S <rs@arunoMac-mini.local>
+Date: Thu, 5 Mar 2026 17:55:06 +0800
+Subject: [PATCH 09/12] =?UTF-8?q?=E5=85=A8=E3=83=9A=E3=83=BC=E3=82=B8?=
+ =?UTF-8?q?=E3=83=87=E3=82=B6=E3=82=A4=E3=83=B3=E7=B5=B1=E4=B8=80=20+=2040?=
+ =?UTF-8?q?4=20+=20robots/sitemap=20+=20GA4=E5=85=A8CTA=E5=AF=BE=E5=BF=9C?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- privacy/terms: 規約v2.0カラー・フォント・レイアウト適用
+- subsidy/[id]: 規約v2.0適用 + GA4イベント
+- 404ページ新規作成
+- robots.txt + sitemap.xml
+- Header/MobileCTABar: GA4 cta_click追加
+- サービス名「補助金AI」→「補助金診断」に統一
+---
+ frontend/public/robots.txt                  |   5 +
+ frontend/public/sitemap.xml                 |  23 ++++
+ frontend/src/app/not-found.tsx              |  23 ++++
+ frontend/src/app/privacy/page.tsx           |  38 +++---
+ frontend/src/app/subsidy/[id]/page.tsx      | 131 ++++++++++----------
+ frontend/src/app/terms/page.tsx             |  34 ++---
+ frontend/src/components/layout/Header.tsx   |   2 +
+ frontend/src/components/ui/MobileCTABar.tsx |   2 +
+ 8 files changed, 158 insertions(+), 100 deletions(-)
+ create mode 100644 frontend/public/robots.txt
+ create mode 100644 frontend/public/sitemap.xml
+ create mode 100644 frontend/src/app/not-found.tsx
+
+diff --git a/frontend/public/robots.txt b/frontend/public/robots.txt
+new file mode 100644
+index 0000000..bab7cbb
+--- /dev/null
++++ b/frontend/public/robots.txt
+@@ -0,0 +1,5 @@
++User-agent: *
++Allow: /
++Disallow: /api/
++
++Sitemap: https://subsidy-diagnosis-app-production.up.railway.app/sitemap.xml
+diff --git a/frontend/public/sitemap.xml b/frontend/public/sitemap.xml
+new file mode 100644
+index 0000000..d156df3
+--- /dev/null
++++ b/frontend/public/sitemap.xml
+@@ -0,0 +1,23 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
++  <url>
++    <loc>https://subsidy-diagnosis-app-production.up.railway.app/</loc>
++    <changefreq>weekly</changefreq>
++    <priority>1.0</priority>
++  </url>
++  <url>
++    <loc>https://subsidy-diagnosis-app-production.up.railway.app/diagnosis</loc>
++    <changefreq>weekly</changefreq>
++    <priority>0.9</priority>
++  </url>
++  <url>
++    <loc>https://subsidy-diagnosis-app-production.up.railway.app/privacy</loc>
++    <changefreq>monthly</changefreq>
++    <priority>0.3</priority>
++  </url>
++  <url>
++    <loc>https://subsidy-diagnosis-app-production.up.railway.app/terms</loc>
++    <changefreq>monthly</changefreq>
++    <priority>0.3</priority>
++  </url>
++</urlset>
+diff --git a/frontend/src/app/not-found.tsx b/frontend/src/app/not-found.tsx
+new file mode 100644
+index 0000000..4512ac3
+--- /dev/null
++++ b/frontend/src/app/not-found.tsx
+@@ -0,0 +1,23 @@
++import Link from "next/link";
++
++export default function NotFound() {
++  return (
++    <main className="min-h-screen bg-[#FAFBFC] flex flex-col items-center justify-center px-4">
++      <p className="text-[48px] font-bold text-[#E5E7EB] mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
++        404
++      </p>
++      <h1 className="text-[20px] font-bold text-[#1B3A5C] mb-2">
++        ページが見つかりません
++      </h1>
++      <p className="text-[15px] text-[#6B7280] mb-8">
++        お探しのページは存在しないか、移動した可能性があります。
++      </p>
++      <Link
++        href="/"
++        className="bg-[#1B3A5C] text-white font-bold text-[15px] px-8 py-3 rounded-xl hover:bg-[#244B73] transition-colors"
++      >
++        トップに戻る
++      </Link>
++    </main>
++  );
++}
+diff --git a/frontend/src/app/privacy/page.tsx b/frontend/src/app/privacy/page.tsx
+index 5f60338..1c4664b 100644
+--- a/frontend/src/app/privacy/page.tsx
++++ b/frontend/src/app/privacy/page.tsx
+@@ -1,47 +1,47 @@
+-"use client";
+-
+ import Link from "next/link";
+ 
+ export default function Privacy() {
+   return (
+-    <main className="min-h-screen bg-white py-16 px-4">
+-      <div className="max-w-3xl mx-auto">
+-        <Link href="/" className="text-blue-600 text-sm hover:underline mb-8 block">← トップに戻る</Link>
+-        <h1 className="text-3xl font-bold text-gray-900 mb-8">プライバシーポリシー</h1>
++    <main className="min-h-screen bg-[#FAFBFC] py-16 px-4">
++      <div className="max-w-[720px] mx-auto">
++        <Link href="/" className="text-[14px] text-[#6B7280] hover:text-[#1B3A5C] transition-colors mb-8 block">
++          ← トップに戻る
++        </Link>
++        <h1 className="text-[28px] font-bold text-[#1B3A5C] mb-8">プライバシーポリシー</h1>
+ 
+-        <div className="prose prose-gray max-w-none text-sm leading-relaxed space-y-6">
+-          <p>補助金AI（以下「本サービス」）は、ユーザーの個人情報の重要性を認識し、以下のとおりプライバシーポリシーを定めます。</p>
++        <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 sm:p-8 space-y-6 text-[15px] text-[#2D2D2D] leading-[1.8]">
++          <p>補助金診断（以下「本サービス」）は、ユーザーの個人情報の重要性を認識し、以下のとおりプライバシーポリシーを定めます。</p>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">1. 収集する情報</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">1. 収集する情報</h2>
+           <p>本サービスでは、診断に必要な以下の情報を収集します：</p>
+           <ul className="list-disc pl-6 space-y-1">
+-            <li>業種、従業員数、設立年、年間売上等の企業情報</li>
+-            <li>投資目的に関する選択情報</li>
+-            <li>LINE@登録時に提供される情報</li>
++            <li>業種、従業員数、年間売上等の企業情報</li>
++            <li>興味のある分野に関する選択情報</li>
++            <li>LINE登録時に提供される情報</li>
+           </ul>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">2. 情報の利用目的</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">2. 情報の利用目的</h2>
+           <ul className="list-disc pl-6 space-y-1">
+-            <li>補助金の診断・マッチングサービスの提供</li>
++            <li>補助金の診断サービスの提供</li>
+             <li>提携行政書士への適切な引き継ぎ</li>
+             <li>サービスの改善・開発</li>
+             <li>お問い合わせへの対応</li>
+           </ul>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">3. 第三者提供</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">3. 第三者提供</h2>
+           <p>ユーザーの同意なく個人情報を第三者に提供することはありません。ただし、以下の場合を除きます：</p>
+           <ul className="list-disc pl-6 space-y-1">
+             <li>ユーザーが申請サポートを希望し、提携行政書士への引き継ぎに同意した場合</li>
+             <li>法令に基づく場合</li>
+           </ul>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">4. 安全管理</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">4. 安全管理</h2>
+           <p>SSL/TLS暗号化通信を使用し、個人情報の漏洩・滅失・毀損を防止するため、適切な安全管理措置を講じます。</p>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">5. お問い合わせ</h2>
+-          <p>個人情報の取扱いに関するお問い合わせは、LINE@よりご連絡ください。</p>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">5. お問い合わせ</h2>
++          <p>個人情報の取扱いに関するお問い合わせは、LINEよりご連絡ください。</p>
+ 
+-          <p className="text-gray-400 mt-8">制定日: 2026年3月4日</p>
++          <p className="text-[#6B7280] text-[13px] pt-4">制定日: 2026年3月4日</p>
+         </div>
+       </div>
+     </main>
+diff --git a/frontend/src/app/subsidy/[id]/page.tsx b/frontend/src/app/subsidy/[id]/page.tsx
+index ff8a63b..10e6761 100644
+--- a/frontend/src/app/subsidy/[id]/page.tsx
++++ b/frontend/src/app/subsidy/[id]/page.tsx
+@@ -3,6 +3,7 @@
+ import { useEffect, useState } from "react";
+ import { useParams } from "next/navigation";
+ import Link from "next/link";
++import { trackEvent } from "@/components/ui/Analytics";
+ 
+ interface SubsidyDetail {
+   id: string;
+@@ -17,7 +18,6 @@ interface SubsidyDetail {
+   application_deadline: string | null;
+   deadline_type: string;
+   status: string;
+-  // Extended fields from full API
+   eligible_industries?: string[];
+   eligible_employee_min?: number | null;
+   eligible_employee_max?: number | null;
+@@ -36,25 +36,21 @@ function formatAmount(amount: number | null): string {
+   return `${amount}円`;
+ }
+ 
+-function DifficultyBadge({ rank }: { rank: string }) {
+-  const colors: Record<string, string> = {
+-    C: "bg-green-100 text-green-800",
+-    B: "bg-yellow-100 text-yellow-800",
+-    A: "bg-red-100 text-red-800",
+-  };
+-  const labels: Record<string, string> = {
+-    C: "易しい",
+-    B: "普通",
+-    A: "難しい",
++function DifficultyLabel({ rank }: { rank: string }) {
++  const labels: Record<string, { text: string; color: string }> = {
++    C: { text: "比較的申請しやすい", color: "bg-[#E6F4ED] text-[#2E7D5B]" },
++    B: { text: "標準的な難易度", color: "bg-[#FEF3C7] text-[#92400E]" },
++    A: { text: "申請の難易度が高い", color: "bg-[#FEE2E2] text-[#991B1B]" },
+   };
++  const label = labels[rank] || labels.B;
+   return (
+-    <span className={`px-3 py-1 rounded-full text-sm font-medium ${colors[rank] || "bg-gray-100"}`}>
+-      難易度{rank} — {labels[rank]}
++    <span className={`text-[12px] font-medium px-3 py-1 rounded-full ${label.color}`}>
++      {label.text}
+     </span>
+   );
+ }
+ 
+-export default function SubsidyDetail() {
++export default function SubsidyDetailPage() {
+   const params = useParams();
+   const [subsidy, setSubsidy] = useState<SubsidyDetail | null>(null);
+   const [loading, setLoading] = useState(true);
+@@ -73,47 +69,59 @@ export default function SubsidyDetail() {
+       .finally(() => setLoading(false));
+   }, [params.id]);
+ 
+-  if (loading) return <div className="min-h-screen flex items-center justify-center">読み込み中...</div>;
+-  if (error) return (
+-    <div className="min-h-screen flex flex-col items-center justify-center">
+-      <p className="text-gray-500 text-lg mb-4">{error}</p>
+-      <Link href="/" className="text-blue-600 underline">トップに戻る</Link>
+-    </div>
+-  );
++  if (loading) {
++    return (
++      <div className="min-h-screen bg-[#FAFBFC] flex items-center justify-center">
++        <p className="text-[#6B7280]">読み込み中...</p>
++      </div>
++    );
++  }
++
++  if (error) {
++    return (
++      <div className="min-h-screen bg-[#FAFBFC] flex flex-col items-center justify-center">
++        <p className="text-[#6B7280] text-[16px] mb-4">{error}</p>
++        <Link href="/" className="text-[#1B3A5C] font-medium underline">トップに戻る</Link>
++      </div>
++    );
++  }
++
+   if (!subsidy) return null;
+ 
+   return (
+-    <main className="min-h-screen bg-gray-50 py-12 px-4">
+-      <div className="max-w-3xl mx-auto">
+-        <Link href="/results" className="text-blue-600 text-sm mb-4 inline-block">← 結果一覧に戻る</Link>
++    <main className="min-h-screen bg-[#FAFBFC] py-12 px-4">
++      <div className="max-w-[720px] mx-auto">
++        <Link href="/results" className="text-[14px] text-[#6B7280] hover:text-[#1B3A5C] transition-colors mb-6 block">
++          ← 結果一覧に戻る
++        </Link>
+ 
+-        <div className="bg-white rounded-lg shadow p-8">
++        <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 sm:p-8">
+           <div className="flex items-start justify-between mb-6">
+             <div>
+-              <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded">{subsidy.category}</span>
+-              <h1 className="text-2xl font-bold text-gray-900 mt-2">{subsidy.name}</h1>
+-              <p className="text-gray-500 mt-1">{subsidy.provider}</p>
++              <span className="text-[12px] bg-[#E8EDF3] text-[#1B3A5C] px-2.5 py-1 rounded-full">{subsidy.category}</span>
++              <h1 className="text-[22px] font-bold text-[#1B3A5C] mt-2">{subsidy.name}</h1>
++              <p className="text-[14px] text-[#6B7280] mt-1">{subsidy.provider}</p>
+             </div>
+-            <DifficultyBadge rank={subsidy.difficulty_rank} />
++            <DifficultyLabel rank={subsidy.difficulty_rank} />
+           </div>
+ 
+           {/* 金額情報 */}
+-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 p-4 bg-blue-50 rounded-lg">
++          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 p-5 bg-[#E8EDF3] rounded-xl">
+             <div>
+-              <span className="text-xs text-gray-500">補助金額</span>
+-              <p className="text-lg font-bold text-gray-900">
++              <p className="text-[12px] text-[#6B7280]">補助金額</p>
++              <p className="text-[17px] font-bold text-[#1B3A5C]">
+                 {formatAmount(subsidy.min_amount)} 〜 {formatAmount(subsidy.max_amount)}
+               </p>
+             </div>
+             <div>
+-              <span className="text-xs text-gray-500">補助率</span>
+-              <p className="text-lg font-bold text-gray-900">
++              <p className="text-[12px] text-[#6B7280]">補助率</p>
++              <p className="text-[17px] font-bold text-[#1B3A5C]">
+                 {subsidy.subsidy_rate ? `${(subsidy.subsidy_rate * 100).toFixed(0)}%` : "—"}
+               </p>
+             </div>
+             <div>
+-              <span className="text-xs text-gray-500">過去採択率</span>
+-              <p className="text-lg font-bold text-gray-900">
++              <p className="text-[12px] text-[#6B7280]">過去採択率</p>
++              <p className="text-[17px] font-bold text-[#1B3A5C]">
+                 {subsidy.historical_acceptance_rate ? `${subsidy.historical_acceptance_rate}%` : "—"}
+               </p>
+             </div>
+@@ -121,24 +129,22 @@ export default function SubsidyDetail() {
+ 
+           {/* 申請期限 */}
+           <div className="mb-6">
+-            <h2 className="text-sm font-medium text-gray-700 mb-2">申請期限</h2>
+-            <div className="flex items-center gap-2">
+-              {subsidy.deadline_type === "rolling" ? (
+-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">通年公募</span>
+-              ) : subsidy.application_deadline ? (
+-                <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">
+-                  {subsidy.application_deadline}まで
+-                </span>
+-              ) : (
+-                <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm">未定</span>
+-              )}
+-            </div>
++            <h2 className="text-[14px] font-medium text-[#6B7280] mb-2">申請期限</h2>
++            {subsidy.deadline_type === "rolling" ? (
++              <span className="text-[13px] bg-[#E6F4ED] text-[#2E7D5B] px-3 py-1 rounded-full">通年公募</span>
++            ) : subsidy.application_deadline ? (
++              <span className="text-[13px] bg-[#FEF3C7] text-[#92400E] px-3 py-1 rounded-full">
++                {subsidy.application_deadline}まで
++              </span>
++            ) : (
++              <span className="text-[13px] bg-[#E5E7EB] text-[#6B7280] px-3 py-1 rounded-full">未定</span>
++            )}
+           </div>
+ 
+           {/* 対象要件 */}
+           <div className="mb-6">
+-            <h2 className="text-sm font-medium text-gray-700 mb-2">対象要件</h2>
+-            <div className="space-y-2 text-sm text-gray-600">
++            <h2 className="text-[14px] font-medium text-[#6B7280] mb-2">対象要件</h2>
++            <div className="space-y-2 text-[14px] text-[#2D2D2D]">
+               {subsidy.eligible_employee_max && (
+                 <p>従業員数: {subsidy.eligible_employee_min || 0}〜{subsidy.eligible_employee_max}人</p>
+               )}
+@@ -146,14 +152,10 @@ export default function SubsidyDetail() {
+                 <p>資本金上限: {formatAmount(subsidy.eligible_capital_max)}</p>
+               )}
+               {subsidy.requires_wage_increase && (
+-                <p className="flex items-center gap-1">
+-                  <span className="text-orange-500">⚠</span> 賃上げ計画が必要
+-                </p>
++                <p className="text-[#92400E]">⚠ 賃上げ計画が必要</p>
+               )}
+               {subsidy.requires_gbiz_id && (
+-                <p className="flex items-center gap-1">
+-                  <span className="text-orange-500">⚠</span> GビズIDが必要
+-                </p>
++                <p className="text-[#92400E]">⚠ GビズIDが必要</p>
+               )}
+             </div>
+           </div>
+@@ -161,11 +163,11 @@ export default function SubsidyDetail() {
+           {/* 必要書類 */}
+           {subsidy.required_documents && subsidy.required_documents.length > 0 && (
+             <div className="mb-6">
+-              <h2 className="text-sm font-medium text-gray-700 mb-2">必要書類</h2>
+-              <ul className="space-y-1">
++              <h2 className="text-[14px] font-medium text-[#6B7280] mb-2">必要書類</h2>
++              <ul className="space-y-1.5">
+                 {subsidy.required_documents.map((doc, i) => (
+-                  <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
+-                    <span className="text-blue-500">📄</span> {doc}
++                  <li key={i} className="flex items-center gap-2 text-[14px] text-[#2D2D2D]">
++                    <span>📄</span> {doc}
+                   </li>
+                 ))}
+               </ul>
+@@ -173,17 +175,18 @@ export default function SubsidyDetail() {
+           )}
+ 
+           {/* CTA */}
+-          <div className="mt-8 p-4 bg-gray-50 rounded-lg text-center">
+-            <p className="text-gray-600 mb-3">この補助金を申請しますか？</p>
++          <div className="mt-8 p-6 bg-[#F5F3EF] rounded-xl text-center">
++            <p className="text-[15px] text-[#2D2D2D] mb-4">この補助金について詳しく相談しますか？</p>
+             <a
+               href={`https://line.me/R/ti/p/DUMMY_LINE_ID?subsidy=${params.id}`}
+               target="_blank"
+               rel="noopener noreferrer"
+-              className="inline-block bg-[#06C755] text-white px-8 py-3 rounded-md font-medium hover:bg-[#05b34c]"
++              onClick={() => trackEvent("line_register_click", { from: "subsidy_detail", subsidy_id: params.id as string })}
++              className="inline-block bg-[#06C755] text-white font-bold text-[16px] px-8 py-3.5 rounded-xl hover:bg-[#05b34c] transition-colors"
+             >
+               LINEで相談する
+             </a>
+-            <p className="text-xs text-gray-400 mt-2">提携行政書士が申請をサポートします</p>
++            <p className="text-[12px] text-[#6B7280] mt-3">提携行政書士が申請をサポートします</p>
+           </div>
+         </div>
+       </div>
+diff --git a/frontend/src/app/terms/page.tsx b/frontend/src/app/terms/page.tsx
+index 1895a2c..bb15f13 100644
+--- a/frontend/src/app/terms/page.tsx
++++ b/frontend/src/app/terms/page.tsx
+@@ -1,42 +1,42 @@
+-"use client";
+-
+ import Link from "next/link";
+ 
+ export default function Terms() {
+   return (
+-    <main className="min-h-screen bg-white py-16 px-4">
+-      <div className="max-w-3xl mx-auto">
+-        <Link href="/" className="text-blue-600 text-sm hover:underline mb-8 block">← トップに戻る</Link>
+-        <h1 className="text-3xl font-bold text-gray-900 mb-8">利用規約</h1>
+-
+-        <div className="prose prose-gray max-w-none text-sm leading-relaxed space-y-6">
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">第1条（サービス内容）</h2>
+-          <p>補助金AI（以下「本サービス」）は、中小企業・個人事業主を対象とした補助金診断サービスを提供します。本サービスの診断結果は参考情報であり、補助金の採択を保証するものではありません。</p>
+-
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">第2条（診断料金）</h2>
++    <main className="min-h-screen bg-[#FAFBFC] py-16 px-4">
++      <div className="max-w-[720px] mx-auto">
++        <Link href="/" className="text-[14px] text-[#6B7280] hover:text-[#1B3A5C] transition-colors mb-8 block">
++          ← トップに戻る
++        </Link>
++        <h1 className="text-[28px] font-bold text-[#1B3A5C] mb-8">利用規約</h1>
++
++        <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 sm:p-8 space-y-6 text-[15px] text-[#2D2D2D] leading-[1.8]">
++          <h2 className="text-[17px] font-bold text-[#1B3A5C]">第1条（サービス内容）</h2>
++          <p>補助金診断（以下「本サービス」）は、中小企業・個人事業主を対象とした補助金診断サービスを提供します。本サービスの診断結果は参考情報であり、補助金の採択を保証するものではありません。</p>
++
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">第2条（診断料金）</h2>
+           <p>本サービスの診断機能は無料でご利用いただけます。行政書士による申請サポートをご利用の場合は、別途費用が発生します。</p>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">第3条（行政書士による申請サポート）</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">第3条（行政書士による申請サポート）</h2>
+           <p>補助金の申請書類作成・申請代行は、提携行政書士が行います。申請サポートに関する契約は、ユーザーと提携行政書士の間で直接締結されます。</p>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">第4条（免責事項）</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">第4条（免責事項）</h2>
+           <ul className="list-disc pl-6 space-y-1">
+             <li>本サービスの診断結果は参考情報であり、正確性・完全性を保証するものではありません</li>
+             <li>補助金の採択・不採択について、本サービスは一切の責任を負いません</li>
+             <li>補助金制度の変更により、診断結果と実際の条件が異なる場合があります</li>
+           </ul>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">第5条（禁止事項）</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">第5条（禁止事項）</h2>
+           <ul className="list-disc pl-6 space-y-1">
+             <li>虚偽の情報を入力する行為</li>
+             <li>本サービスの運営を妨害する行為</li>
+             <li>その他、法令に違反する行為</li>
+           </ul>
+ 
+-          <h2 className="text-lg font-bold text-gray-900 mt-8">第6条（規約の変更）</h2>
++          <h2 className="text-[17px] font-bold text-[#1B3A5C] pt-2">第6条（規約の変更）</h2>
+           <p>本規約は予告なく変更される場合があります。変更後の規約は、本ページに掲載した時点で効力を生じます。</p>
+ 
+-          <p className="text-gray-400 mt-8">制定日: 2026年3月4日</p>
++          <p className="text-[#6B7280] text-[13px] pt-4">制定日: 2026年3月4日</p>
+         </div>
+       </div>
+     </main>
+diff --git a/frontend/src/components/layout/Header.tsx b/frontend/src/components/layout/Header.tsx
+index d34d0fd..96986ab 100644
+--- a/frontend/src/components/layout/Header.tsx
++++ b/frontend/src/components/layout/Header.tsx
+@@ -1,6 +1,7 @@
+ "use client";
+ 
+ import Link from "next/link";
++import { trackEvent } from "@/components/ui/Analytics";
+ 
+ export default function Header() {
+   return (
+@@ -11,6 +12,7 @@ export default function Header() {
+         </Link>
+         <Link
+           href="/diagnosis"
++          onClick={() => trackEvent("cta_click", { location: "header" })}
+           className="bg-[#E8772E] text-white text-sm font-bold px-6 py-2.5 rounded-lg hover:bg-[#D06A28] transition-colors"
+         >
+           無料で診断する
+diff --git a/frontend/src/components/ui/MobileCTABar.tsx b/frontend/src/components/ui/MobileCTABar.tsx
+index 13721e3..7ac700e 100644
+--- a/frontend/src/components/ui/MobileCTABar.tsx
++++ b/frontend/src/components/ui/MobileCTABar.tsx
+@@ -3,6 +3,7 @@
+ import { useState, useEffect } from "react";
+ import { motion, AnimatePresence } from "framer-motion";
+ import Link from "next/link";
++import { trackEvent } from "@/components/ui/Analytics";
+ 
+ export default function MobileCTABar() {
+   const [show, setShow] = useState(false);
+@@ -31,6 +32,7 @@ export default function MobileCTABar() {
+             </p>
+             <Link
+               href="/diagnosis"
++              onClick={() => trackEvent("cta_click", { location: "mobile_bar" })}
+               className="bg-[#E8772E] text-white text-[15px] font-bold px-6 py-3 rounded-lg hover:bg-[#D06A28] transition-colors shrink-0"
+             >
+               無料で診断する
+-- 
+2.50.1 (Apple Git-155)
+
+

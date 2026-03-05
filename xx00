@@ -1,0 +1,826 @@
+From aa901dafe443104aedb41cf45c8b57c7a3cfc24d Mon Sep 17 00:00:00 2001
+From: R S <rs@arunoMac-mini.local>
+Date: Wed, 4 Mar 2026 15:24:00 +0800
+Subject: [PATCH 01/12] =?UTF-8?q?feat:=20LP=E5=A4=A7=E5=B9=85=E6=94=B9?=
+ =?UTF-8?q?=E4=BF=AE=20-=20=E6=A8=A9=E5=A8=81=E6=80=A7=E5=BC=B7=E5=8C=96?=
+ =?UTF-8?q?=E3=83=BB=E5=8B=95=E7=9A=84=E3=82=A2=E3=83=8B=E3=83=A1=E3=83=BC?=
+ =?UTF-8?q?=E3=82=B7=E3=83=A7=E3=83=B3=E3=83=BBFAQ=E3=83=BB=E3=83=97?=
+ =?UTF-8?q?=E3=83=A9=E3=82=A4=E3=83=90=E3=82=B7=E3=83=BC=E3=83=9D=E3=83=AA?=
+ =?UTF-8?q?=E3=82=B7=E3=83=BC=E3=83=BB=E5=88=A9=E7=94=A8=E8=A6=8F=E7=B4=84?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Framer Motion追加: パーティクル背景、フェードインアニメーション、カウントアップ
+- 実績バー: 対応補助金8種類、最大1,500万円、診断料金¥0
+- 悩み共感セクション強化
+- 信頼要素にバッジ追加（法令遵守・SSL対応・無料）
+- FAQセクション追加（5問）
+- プライバシーポリシーページ (/privacy)
+- 利用規約ページ (/terms)
+- フッターにリンク追加
+- CTAボタンを黄色に変更（コントラスト強化）
+- 中間CTAセクション追加
+---
+ frontend/package-lock.json        |  54 +++-
+ frontend/package.json             |   1 +
+ frontend/src/app/page.tsx         | 439 +++++++++++++++++++++++-------
+ frontend/src/app/privacy/page.tsx |  49 ++++
+ frontend/src/app/terms/page.tsx   |  44 +++
+ 5 files changed, 483 insertions(+), 104 deletions(-)
+ create mode 100644 frontend/src/app/privacy/page.tsx
+ create mode 100644 frontend/src/app/terms/page.tsx
+
+diff --git a/frontend/package-lock.json b/frontend/package-lock.json
+index cdac658..a4ec395 100644
+--- a/frontend/package-lock.json
++++ b/frontend/package-lock.json
+@@ -8,6 +8,7 @@
+       "name": "frontend",
+       "version": "0.1.0",
+       "dependencies": {
++        "framer-motion": "^12.34.5",
+         "next": "16.1.6",
+         "react": "19.2.3",
+         "react-dom": "19.2.3"
+@@ -67,7 +68,6 @@
+       "integrity": "sha512-CGOfOJqWjg2qW/Mb6zNsDm+u5vFQ8DxXfbM09z69p5Z6+mE1ikP2jUXw+j42Pf1XTYED2Rni5f95npYeuwMDQA==",
+       "dev": true,
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "@babel/code-frame": "^7.29.0",
+         "@babel/generator": "^7.29.0",
+@@ -1562,7 +1562,6 @@
+       "integrity": "sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==",
+       "dev": true,
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "csstype": "^3.2.2"
+       }
+@@ -1622,7 +1621,6 @@
+       "integrity": "sha512-klQbnPAAiGYFyI02+znpBRLyjL4/BrBd0nyWkdC0s/6xFLkXYQ8OoRrSkqacS1ddVxf/LDyODIKbQ5TgKAf/Fg==",
+       "dev": true,
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "@typescript-eslint/scope-manager": "8.56.1",
+         "@typescript-eslint/types": "8.56.1",
+@@ -2148,7 +2146,6 @@
+       "integrity": "sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw==",
+       "dev": true,
+       "license": "MIT",
+-      "peer": true,
+       "bin": {
+         "acorn": "bin/acorn"
+       },
+@@ -2492,7 +2489,6 @@
+         }
+       ],
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "baseline-browser-mapping": "^2.9.0",
+         "caniuse-lite": "^1.0.30001759",
+@@ -3060,7 +3056,6 @@
+       "integrity": "sha512-VmQ+sifHUbI/IcSopBCF/HO3YiHQx/AVd3UVyYL6weuwW+HvON9VYn5l6Zl1WZzPWXPNZrSQpxwkkZ/VuvJZzg==",
+       "dev": true,
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "@eslint-community/eslint-utils": "^4.8.0",
+         "@eslint-community/regexpp": "^4.12.1",
+@@ -3626,6 +3621,33 @@
+         "url": "https://github.com/sponsors/ljharb"
+       }
+     },
++    "node_modules/framer-motion": {
++      "version": "12.34.5",
++      "resolved": "https://registry.npmjs.org/framer-motion/-/framer-motion-12.34.5.tgz",
++      "integrity": "sha512-Z2dQ+o7BsfpJI3+u0SQUNCrN+ajCKJen1blC4rCHx1Ta2EOHs+xKJegLT2aaD9iSMbU3OoX+WabQXkloUbZmJQ==",
++      "license": "MIT",
++      "dependencies": {
++        "motion-dom": "^12.34.5",
++        "motion-utils": "^12.29.2",
++        "tslib": "^2.4.0"
++      },
++      "peerDependencies": {
++        "@emotion/is-prop-valid": "*",
++        "react": "^18.0.0 || ^19.0.0",
++        "react-dom": "^18.0.0 || ^19.0.0"
++      },
++      "peerDependenciesMeta": {
++        "@emotion/is-prop-valid": {
++          "optional": true
++        },
++        "react": {
++          "optional": true
++        },
++        "react-dom": {
++          "optional": true
++        }
++      }
++    },
+     "node_modules/function-bind": {
+       "version": "1.1.2",
+       "resolved": "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz",
+@@ -4941,6 +4963,21 @@
+         "url": "https://github.com/sponsors/ljharb"
+       }
+     },
++    "node_modules/motion-dom": {
++      "version": "12.34.5",
++      "resolved": "https://registry.npmjs.org/motion-dom/-/motion-dom-12.34.5.tgz",
++      "integrity": "sha512-k33CsnxO2K3gBRMUZT+vPmc4Utlb5menKdG0RyVNLtlqRaaJPRWlE9fXl8NTtfZ5z3G8TDvqSu0MENLqSTaHZA==",
++      "license": "MIT",
++      "dependencies": {
++        "motion-utils": "^12.29.2"
++      }
++    },
++    "node_modules/motion-utils": {
++      "version": "12.29.2",
++      "resolved": "https://registry.npmjs.org/motion-utils/-/motion-utils-12.29.2.tgz",
++      "integrity": "sha512-G3kc34H2cX2gI63RqU+cZq+zWRRPSsNIOjpdl9TN4AQwC4sgwYPl/Q/Obf/d53nOm569T0fYK+tcoSV50BWx8A==",
++      "license": "MIT"
++    },
+     "node_modules/ms": {
+       "version": "2.1.3",
+       "resolved": "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz",
+@@ -5443,7 +5480,6 @@
+       "resolved": "https://registry.npmjs.org/react/-/react-19.2.3.tgz",
+       "integrity": "sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA==",
+       "license": "MIT",
+-      "peer": true,
+       "engines": {
+         "node": ">=0.10.0"
+       }
+@@ -5453,7 +5489,6 @@
+       "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-19.2.3.tgz",
+       "integrity": "sha512-yELu4WmLPw5Mr/lmeEpox5rw3RETacE++JgHqQzd2dg+YbJuat3jH4ingc+WPZhxaoFzdv9y33G+F7Nl5O0GBg==",
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "scheduler": "^0.27.0"
+       },
+@@ -6142,7 +6177,6 @@
+       "integrity": "sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==",
+       "dev": true,
+       "license": "MIT",
+-      "peer": true,
+       "engines": {
+         "node": ">=12"
+       },
+@@ -6305,7 +6339,6 @@
+       "integrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==",
+       "dev": true,
+       "license": "Apache-2.0",
+-      "peer": true,
+       "bin": {
+         "tsc": "bin/tsc",
+         "tsserver": "bin/tsserver"
+@@ -6581,7 +6614,6 @@
+       "integrity": "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==",
+       "dev": true,
+       "license": "MIT",
+-      "peer": true,
+       "funding": {
+         "url": "https://github.com/sponsors/colinhacks"
+       }
+diff --git a/frontend/package.json b/frontend/package.json
+index dc832c5..4d047a2 100644
+--- a/frontend/package.json
++++ b/frontend/package.json
+@@ -9,6 +9,7 @@
+     "lint": "eslint"
+   },
+   "dependencies": {
++    "framer-motion": "^12.34.5",
+     "next": "16.1.6",
+     "react": "19.2.3",
+     "react-dom": "19.2.3"
+diff --git a/frontend/src/app/page.tsx b/frontend/src/app/page.tsx
+index 0111e84..2d975c3 100644
+--- a/frontend/src/app/page.tsx
++++ b/frontend/src/app/page.tsx
+@@ -1,165 +1,418 @@
+ "use client";
+ 
+ import Link from "next/link";
++import { motion, useInView } from "framer-motion";
++import { useRef, useEffect, useState } from "react";
++
++// カウントアップアニメーション
++function CountUp({ end, duration = 2, suffix = "" }: { end: number; duration?: number; suffix?: string }) {
++  const [count, setCount] = useState(0);
++  const ref = useRef<HTMLSpanElement>(null);
++  const inView = useInView(ref, { once: true });
++
++  useEffect(() => {
++    if (!inView) return;
++    let start = 0;
++    const step = end / (duration * 60);
++    const timer = setInterval(() => {
++      start += step;
++      if (start >= end) {
++        setCount(end);
++        clearInterval(timer);
++      } else {
++        setCount(Math.floor(start));
++      }
++    }, 1000 / 60);
++    return () => clearInterval(timer);
++  }, [inView, end, duration]);
++
++  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
++}
++
++// フェードインアニメーション
++function FadeIn({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
++  return (
++    <motion.div
++      initial={{ opacity: 0, y: 30 }}
++      whileInView={{ opacity: 1, y: 0 }}
++      viewport={{ once: true }}
++      transition={{ duration: 0.6, delay }}
++    >
++      {children}
++    </motion.div>
++  );
++}
+ 
+ export default function Home() {
+   return (
+     <main className="min-h-screen bg-white">
+       {/* ファーストビュー */}
+-      <section className="bg-gradient-to-b from-blue-600 to-blue-700 text-white py-20 px-4">
+-        <div className="max-w-3xl mx-auto text-center">
+-          <p className="text-sm font-medium opacity-80 mb-3">行政書士監修 × AI診断</p>
+-          <h1 className="text-3xl sm:text-5xl font-bold mb-4 leading-tight">
+-            たった30秒で<br />対象の補助金がわかる
+-          </h1>
+-          <p className="text-lg opacity-90 mb-8">
++      <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 text-white py-24 px-4">
++        {/* 背景パーティクル */}
++        <div className="absolute inset-0 overflow-hidden">
++          {[...Array(20)].map((_, i) => (
++            <motion.div
++              key={i}
++              className="absolute w-2 h-2 bg-white/10 rounded-full"
++              style={{
++                left: `${Math.random() * 100}%`,
++                top: `${Math.random() * 100}%`,
++              }}
++              animate={{
++                y: [0, -30, 0],
++                opacity: [0.1, 0.3, 0.1],
++              }}
++              transition={{
++                duration: 3 + Math.random() * 2,
++                repeat: Infinity,
++                delay: Math.random() * 2,
++              }}
++            />
++          ))}
++        </div>
++
++        <div className="max-w-4xl mx-auto text-center relative z-10">
++          <motion.div
++            initial={{ opacity: 0, y: -10 }}
++            animate={{ opacity: 1, y: 0 }}
++            transition={{ duration: 0.5 }}
++          >
++            <span className="inline-block bg-white/20 backdrop-blur-sm text-sm font-medium px-4 py-1.5 rounded-full mb-6">
++              🏛️ 行政書士監修 × AI診断
++            </span>
++          </motion.div>
++
++          <motion.h1
++            className="text-4xl sm:text-6xl font-extrabold mb-6 leading-tight tracking-tight"
++            initial={{ opacity: 0, y: 20 }}
++            animate={{ opacity: 1, y: 0 }}
++            transition={{ duration: 0.6, delay: 0.1 }}
++          >
++            たった30秒で<br />
++            <span className="text-yellow-300">最大1,500万円</span>の<br className="sm:hidden" />
++            補助金が見つかる
++          </motion.h1>
++
++          <motion.p
++            className="text-lg sm:text-xl opacity-90 mb-10 leading-relaxed"
++            initial={{ opacity: 0 }}
++            animate={{ opacity: 1 }}
++            transition={{ duration: 0.6, delay: 0.3 }}
++          >
+             あなたの会社が使える補助金を無料で診断。<br className="hidden sm:block" />
+-            面倒な調査は不要です。
+-          </p>
+-          <Link
+-            href="/diagnosis"
+-            className="inline-block bg-white text-blue-600 font-bold text-lg px-10 py-4 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
++            面倒な調査は不要。選択するだけで完了します。
++          </motion.p>
++
++          <motion.div
++            initial={{ opacity: 0, scale: 0.9 }}
++            animate={{ opacity: 1, scale: 1 }}
++            transition={{ duration: 0.5, delay: 0.5 }}
+           >
+-            無料で診断する（30秒）
+-          </Link>
+-          <p className="text-sm opacity-70 mt-4">※ 登録不要・完全無料</p>
++            <Link
++              href="/diagnosis"
++              className="inline-block bg-yellow-400 text-gray-900 font-bold text-lg px-12 py-5 rounded-full shadow-2xl hover:shadow-yellow-400/30 transition-all hover:scale-105 hover:bg-yellow-300"
++            >
++              無料で診断する（30秒）
++            </Link>
++            <p className="text-sm opacity-70 mt-4">※ 登録不要・完全無料</p>
++          </motion.div>
++        </div>
++      </section>
++
++      {/* 実績バー */}
++      <section className="py-8 px-4 bg-white border-b">
++        <div className="max-w-4xl mx-auto">
++          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
++            <FadeIn>
++              <div>
++                <p className="text-3xl sm:text-4xl font-extrabold text-blue-600">
++                  <CountUp end={8} duration={1} suffix="種類" />
++                </p>
++                <p className="text-sm text-gray-500 mt-1">対応補助金</p>
++              </div>
++            </FadeIn>
++            <FadeIn delay={0.1}>
++              <div>
++                <p className="text-3xl sm:text-4xl font-extrabold text-blue-600">
++                  <CountUp end={1500} duration={1.5} suffix="万円" />
++                </p>
++                <p className="text-sm text-gray-500 mt-1">最大受給額</p>
++              </div>
++            </FadeIn>
++            <FadeIn delay={0.2}>
++              <div>
++                <p className="text-3xl sm:text-4xl font-extrabold text-blue-600">
++                  ¥0
++                </p>
++                <p className="text-sm text-gray-500 mt-1">診断料金</p>
++              </div>
++            </FadeIn>
++          </div>
+         </div>
+       </section>
+ 
+       {/* 悩み共感 */}
+-      <section className="py-16 px-4 bg-gray-50">
+-        <div className="max-w-3xl mx-auto">
+-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-10">
+-            こんなお悩みありませんか？
+-          </h2>
+-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
++      <section className="py-20 px-4 bg-gray-50">
++        <div className="max-w-4xl mx-auto">
++          <FadeIn>
++            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4">
++              こんなお悩みありませんか？
++            </h2>
++            <p className="text-gray-500 text-center mb-12">
++              中小企業の約70%が使える補助金を見逃しています
++            </p>
++          </FadeIn>
++          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+             {[
+               {
+                 emoji: "🤔",
+                 title: "何が対象か分からない",
+-                desc: "補助金は種類が多すぎて、自分の会社がどれに該当するのか分からない",
++                desc: "補助金は種類が多すぎて、自分の会社がどれに該当するのか調べる時間がない",
+               },
+               {
+                 emoji: "📄",
+                 title: "申請が面倒そう",
+-                desc: "書類作成が複雑で、何から始めればいいのか見当もつかない",
++                desc: "書類作成が複雑で、本業に追われて手が回らない。過去に断念した経験も",
+               },
+               {
+                 emoji: "💰",
+-                title: "補助金の存在を知らない",
+-                desc: "使える補助金があるのに、知らないまま損をしているかもしれない",
++                title: "いくらもらえるか不明",
++                desc: "補助金の存在は知っていても、自社でいくら受給できるのか分からない",
+               },
+-            ].map((item) => (
+-              <div key={item.title} className="bg-white rounded-xl p-6 shadow-sm text-center">
+-                <span className="text-4xl mb-3 block">{item.emoji}</span>
+-                <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
+-                <p className="text-sm text-gray-500">{item.desc}</p>
+-              </div>
++            ].map((item, i) => (
++              <FadeIn key={item.title} delay={i * 0.1}>
++                <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow text-center border border-gray-100">
++                  <span className="text-5xl mb-4 block">{item.emoji}</span>
++                  <h3 className="font-bold text-lg text-gray-900 mb-3">{item.title}</h3>
++                  <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
++                </div>
++              </FadeIn>
+             ))}
+           </div>
+         </div>
+       </section>
+ 
+       {/* サービス説明 3ステップ */}
+-      <section className="py-16 px-4">
+-        <div className="max-w-3xl mx-auto">
+-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">
+-            かんたん3ステップ
+-          </h2>
+-          <p className="text-gray-500 text-center mb-10">
+-            補助金AIが最適な補助金をマッチングします
+-          </p>
+-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
++      <section className="py-20 px-4 bg-white">
++        <div className="max-w-4xl mx-auto">
++          <FadeIn>
++            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4">
++              かんたん3ステップ
++            </h2>
++            <p className="text-gray-500 text-center mb-14">
++              補助金AIが最適な補助金をマッチングします
++            </p>
++          </FadeIn>
++          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
+             {[
+               {
+                 step: "1",
+                 title: "30秒で診断",
+-                desc: "業種・従業員数など基本情報を選択するだけ",
+-                color: "bg-blue-100 text-blue-600",
++                desc: "業種・従業員数など基本情報を選択するだけ。入力は一切不要",
++                icon: "📋",
++                color: "from-blue-500 to-blue-600",
+               },
+               {
+                 step: "2",
+                 title: "結果を確認",
+-                desc: "対象の補助金・受給目安額・難易度がすぐ分かる",
+-                color: "bg-green-100 text-green-600",
++                desc: "対象の補助金・受給目安額・難易度が一覧で表示されます",
++                icon: "📊",
++                color: "from-green-500 to-green-600",
+               },
+               {
+                 step: "3",
+                 title: "LINEで相談",
+-                desc: "行政書士が申請をサポート。書類作成もおまかせ",
+-                color: "bg-purple-100 text-purple-600",
++                desc: "行政書士が申請をサポート。書類作成から申請まで全ておまかせ",
++                icon: "💬",
++                color: "from-purple-500 to-purple-600",
+               },
+-            ].map((item) => (
+-              <div key={item.step} className="text-center">
+-                <div className={`w-16 h-16 rounded-full ${item.color} flex items-center justify-center text-2xl font-bold mx-auto mb-4`}>
+-                  {item.step}
++            ].map((item, i) => (
++              <FadeIn key={item.step} delay={i * 0.15}>
++                <div className="text-center">
++                  <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-3xl mx-auto mb-5 shadow-lg`}>
++                    {item.icon}
++                  </div>
++                  <div className="text-xs font-bold text-gray-400 mb-2">STEP {item.step}</div>
++                  <h3 className="font-bold text-xl text-gray-900 mb-3">{item.title}</h3>
++                  <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+                 </div>
+-                <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
+-                <p className="text-sm text-gray-500">{item.desc}</p>
+-              </div>
++              </FadeIn>
+             ))}
+           </div>
+         </div>
+       </section>
+ 
++      {/* 中間CTA */}
++      <section className="py-12 px-4 bg-blue-50">
++        <div className="max-w-2xl mx-auto text-center">
++          <FadeIn>
++            <p className="text-gray-700 font-medium mb-4">まずは30秒の無料診断から</p>
++            <Link
++              href="/diagnosis"
++              className="inline-block bg-blue-600 text-white font-bold text-lg px-10 py-4 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 hover:bg-blue-700"
++            >
++              無料で診断する
++            </Link>
++          </FadeIn>
++        </div>
++      </section>
++
+       {/* 信頼要素 */}
+-      <section className="py-16 px-4 bg-gray-50">
+-        <div className="max-w-3xl mx-auto">
+-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-10">
+-            選ばれる理由
+-          </h2>
+-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
++      <section className="py-20 px-4 bg-white">
++        <div className="max-w-4xl mx-auto">
++          <FadeIn>
++            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4">
++              選ばれる理由
++            </h2>
++            <p className="text-gray-500 text-center mb-14">
++              安心・安全にご利用いただける仕組みを整えています
++            </p>
++          </FadeIn>
++          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+             {[
+               {
+-                icon: "🔒",
+-                title: "行政書士が監修",
+-                desc: "2026年法改正に対応。国家資格者が申請書類を最終チェック",
++                icon: "🏛️",
++                title: "行政書士が監修・対応",
++                desc: "2026年行政書士法改正に完全対応。国家資格者が申請書類を作成・チェックします",
++                badge: "法令遵守",
+               },
+               {
+-                icon: "¥0",
+-                title: "診断は完全無料",
+-                desc: "何度でも無料で診断OK。費用が発生するのは申請を依頼した時だけ",
++                icon: "🔒",
++                title: "安心のセキュリティ",
++                desc: "お客様の情報はSSL暗号化で保護。第三者への提供は一切ありません",
++                badge: "SSL対応",
+               },
+               {
+                 icon: "⚡",
+-                title: "たった30秒",
+-                desc: "選択式の簡単な質問に答えるだけ。面倒な入力は一切なし",
++                title: "完全無料・30秒",
++                desc: "診断は何度でも無料。費用が発生するのは申請を依頼した場合のみです",
++                badge: "無料",
+               },
+-            ].map((item) => (
+-              <div key={item.title} className="bg-white rounded-xl p-6 shadow-sm text-center">
+-                <span className="text-3xl mb-3 block">{item.icon}</span>
+-                <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
+-                <p className="text-sm text-gray-500">{item.desc}</p>
+-              </div>
++            ].map((item, i) => (
++              <FadeIn key={item.title} delay={i * 0.1}>
++                <div className="bg-gray-50 rounded-2xl p-8 text-center border border-gray-100 hover:border-blue-200 transition-colors relative">
++                  <span className="absolute top-4 right-4 text-xs bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full">
++                    {item.badge}
++                  </span>
++                  <span className="text-4xl mb-4 block">{item.icon}</span>
++                  <h3 className="font-bold text-lg text-gray-900 mb-3">{item.title}</h3>
++                  <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
++                </div>
++              </FadeIn>
+             ))}
+           </div>
+         </div>
+       </section>
+ 
+-      {/* 2回目のCTA */}
+-      <section className="py-20 px-4 bg-blue-600 text-white text-center">
+-        <div className="max-w-2xl mx-auto">
+-          <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+-            あなたの会社が使える補助金、<br />今すぐ確認しませんか？
+-          </h2>
+-          <p className="opacity-90 mb-8">
+-            無料・30秒・登録不要で対象の補助金がわかります
+-          </p>
+-          <Link
+-            href="/diagnosis"
+-            className="inline-block bg-white text-blue-600 font-bold text-lg px-10 py-4 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
+-          >
+-            無料で診断する（30秒）
+-          </Link>
++      {/* FAQ */}
++      <section className="py-20 px-4 bg-gray-50">
++        <div className="max-w-3xl mx-auto">
++          <FadeIn>
++            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-12">
++              よくあるご質問
++            </h2>
++          </FadeIn>
++          <div className="space-y-4">
++            {[
++              {
++                q: "本当に無料ですか？",
++                a: "はい、診断は完全無料です。費用が発生するのは、診断後に行政書士への申請サポートを依頼された場合のみです。",
++              },
++              {
++                q: "どんな補助金に対応していますか？",
++                a: "ものづくり補助金、IT導入補助金、小規模事業者持続化補助金、事業承継補助金など主要8種類の補助金に対応しています。",
++              },
++              {
++                q: "個人事業主でも利用できますか？",
++                a: "はい、個人事業主の方もご利用いただけます。小規模事業者持続化補助金など、個人事業主が対象の補助金も多数あります。",
++              },
++              {
++                q: "申請書類は自分で作成する必要がありますか？",
++                a: "いいえ、提携行政書士が書類作成から申請まで全て対応します。お客様は必要な情報をお伝えいただくだけです。",
++              },
++              {
++                q: "補助金が採択されなかった場合、費用はかかりますか？",
++                a: "料金体系は提携行政書士との契約によりますが、成功報酬型のプランもご用意しています。詳しくはLINEでお問い合わせください。",
++              },
++            ].map((item, i) => (
++              <FadeIn key={i} delay={i * 0.05}>
++                <details className="group bg-white rounded-xl border border-gray-200 overflow-hidden">
++                  <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors">
++                    <span className="font-medium text-gray-900">{item.q}</span>
++                    <span className="text-gray-400 group-open:rotate-180 transition-transform ml-4">▼</span>
++                  </summary>
++                  <div className="px-6 pb-6 text-sm text-gray-600 leading-relaxed">
++                    {item.a}
++                  </div>
++                </details>
++              </FadeIn>
++            ))}
++          </div>
++        </div>
++      </section>
++
++      {/* 最終CTA */}
++      <section className="relative py-24 px-4 bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 text-white text-center overflow-hidden">
++        <div className="absolute inset-0 overflow-hidden">
++          {[...Array(15)].map((_, i) => (
++            <motion.div
++              key={i}
++              className="absolute w-1.5 h-1.5 bg-white/10 rounded-full"
++              style={{
++                left: `${Math.random() * 100}%`,
++                top: `${Math.random() * 100}%`,
++              }}
++              animate={{
++                y: [0, -20, 0],
++                opacity: [0.1, 0.25, 0.1],
++              }}
++              transition={{
++                duration: 4 + Math.random() * 2,
++                repeat: Infinity,
++                delay: Math.random() * 3,
++              }}
++            />
++          ))}
++        </div>
++        <div className="max-w-2xl mx-auto relative z-10">
++          <FadeIn>
++            <h2 className="text-3xl sm:text-4xl font-extrabold mb-6 leading-tight">
++              あなたの会社が使える補助金、<br />今すぐ確認しませんか？
++            </h2>
++            <p className="text-lg opacity-90 mb-10">
++              無料・30秒・登録不要で対象の補助金がわかります
++            </p>
++            <Link
++              href="/diagnosis"
++              className="inline-block bg-yellow-400 text-gray-900 font-bold text-xl px-14 py-5 rounded-full shadow-2xl hover:shadow-yellow-400/30 transition-all hover:scale-105 hover:bg-yellow-300"
++            >
++              無料で診断する（30秒）
++            </Link>
++          </FadeIn>
+         </div>
+       </section>
+ 
+       {/* フッター */}
+-      <footer className="py-8 px-4 bg-gray-900 text-gray-400 text-center text-sm">
+-        <p>© 2026 補助金AI. All rights reserved.</p>
+-        <p className="mt-2">
+-          本サービスの補助金申請書類作成は提携行政書士が行います
+-        </p>
++      <footer className="py-10 px-4 bg-gray-900 text-gray-400">
++        <div className="max-w-4xl mx-auto">
++          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
++            <div>
++              <p className="font-bold text-white text-lg">補助金AI</p>
++              <p className="text-xs mt-1">© 2026 補助金AI. All rights reserved.</p>
++            </div>
++            <div className="flex gap-6 text-sm">
++              <Link href="/privacy" className="hover:text-white transition-colors">
++                プライバシーポリシー
++              </Link>
++              <Link href="/terms" className="hover:text-white transition-colors">
++                利用規約
++              </Link>
++            </div>
++          </div>
++          <p className="text-xs text-center mt-6 text-gray-500">
++            本サービスの補助金申請書類作成は提携行政書士が行います
++          </p>
++        </div>
+       </footer>
+     </main>
+   );
+diff --git a/frontend/src/app/privacy/page.tsx b/frontend/src/app/privacy/page.tsx
+new file mode 100644
+index 0000000..5f60338
+--- /dev/null
++++ b/frontend/src/app/privacy/page.tsx
+@@ -0,0 +1,49 @@
++"use client";
++
++import Link from "next/link";
++
++export default function Privacy() {
++  return (
++    <main className="min-h-screen bg-white py-16 px-4">
++      <div className="max-w-3xl mx-auto">
++        <Link href="/" className="text-blue-600 text-sm hover:underline mb-8 block">← トップに戻る</Link>
++        <h1 className="text-3xl font-bold text-gray-900 mb-8">プライバシーポリシー</h1>
++
++        <div className="prose prose-gray max-w-none text-sm leading-relaxed space-y-6">
++          <p>補助金AI（以下「本サービス」）は、ユーザーの個人情報の重要性を認識し、以下のとおりプライバシーポリシーを定めます。</p>
++
++          <h2 className="text-lg font-bold text-gray-900 mt-8">1. 収集する情報</h2>
++          <p>本サービスでは、診断に必要な以下の情報を収集します：</p>
++          <ul className="list-disc pl-6 space-y-1">
++            <li>業種、従業員数、設立年、年間売上等の企業情報</li>
++            <li>投資目的に関する選択情報</li>
++            <li>LINE@登録時に提供される情報</li>
++          </ul>
++
++          <h2 className="text-lg font-bold text-gray-900 mt-8">2. 情報の利用目的</h2>
++          <ul className="list-disc pl-6 space-y-1">
++            <li>補助金の診断・マッチングサービスの提供</li>
++            <li>提携行政書士への適切な引き継ぎ</li>
++            <li>サービスの改善・開発</li>
++            <li>お問い合わせへの対応</li>
++          </ul>
++
++          <h2 className="text-lg font-bold text-gray-900 mt-8">3. 第三者提供</h2>
++          <p>ユーザーの同意なく個人情報を第三者に提供することはありません。ただし、以下の場合を除きます：</p>
++          <ul className="list-disc pl-6 space-y-1">
++            <li>ユーザーが申請サポートを希望し、提携行政書士への引き継ぎに同意した場合</li>
++            <li>法令に基づく場合</li>
++          </ul>
++
++          <h2 className="text-lg font-bold text-gray-900 mt-8">4. 安全管理</h2>
++          <p>SSL/TLS暗号化通信を使用し、個人情報の漏洩・滅失・毀損を防止するため、適切な安全管理措置を講じます。</p>
++
++          <h2 className="text-lg font-bold text-gray-900 mt-8">5. お問い合わせ</h2>
++          <p>個人情報の取扱いに関するお問い合わせは、LINE@よりご連絡ください。</p>
++
++          <p className="text-gray-400 mt-8">制定日: 2026年3月4日</p>
++        </div>
++      </div>
++    </main>
++  );
++}
+diff --git a/frontend/src/app/terms/page.tsx b/frontend/src/app/terms/page.tsx
+new file mode 100644
+index 0000000..1895a2c
+--- /dev/null
++++ b/frontend/src/app/terms/page.tsx
+@@ -0,0 +1,44 @@
++"use client";
++
++import Link from "next/link";
++
++export default function Terms() {
++  return (
++    <main className="min-h-screen bg-white py-16 px-4">
++      <div className="max-w-3xl mx-auto">
++        <Link href="/" className="text-blue-600 text-sm hover:underline mb-8 block">← トップに戻る</Link>
++        <h1 className="text-3xl font-bold text-gray-900 mb-8">利用規約</h1>
++
++        <div className="prose prose-gray max-w-none text-sm leading-relaxed space-y-6">
++          <h2 className="text-lg font-bold text-gray-900 mt-8">第1条（サービス内容）</h2>
++          <p>補助金AI（以下「本サービス」）は、中小企業・個人事業主を対象とした補助金診断サービスを提供します。本サービスの診断結果は参考情報であり、補助金の採択を保証するものではありません。</p>
++
++          <h2 className="text-lg font-bold text-gray-900 mt-8">第2条（診断料金）</h2>
++          <p>本サービスの診断機能は無料でご利用いただけます。行政書士による申請サポートをご利用の場合は、別途費用が発生します。</p>
++
++          <h2 className="text-lg font-bold text-gray-900 mt-8">第3条（行政書士による申請サポート）</h2>
++          <p>補助金の申請書類作成・申請代行は、提携行政書士が行います。申請サポートに関する契約は、ユーザーと提携行政書士の間で直接締結されます。</p>
++
++          <h2 className="text-lg font-bold text-gray-900 mt-8">第4条（免責事項）</h2>
++          <ul className="list-disc pl-6 space-y-1">
++            <li>本サービスの診断結果は参考情報であり、正確性・完全性を保証するものではありません</li>
++            <li>補助金の採択・不採択について、本サービスは一切の責任を負いません</li>
++            <li>補助金制度の変更により、診断結果と実際の条件が異なる場合があります</li>
++          </ul>
++
++          <h2 className="text-lg font-bold text-gray-900 mt-8">第5条（禁止事項）</h2>
++          <ul className="list-disc pl-6 space-y-1">
++            <li>虚偽の情報を入力する行為</li>
++            <li>本サービスの運営を妨害する行為</li>
++            <li>その他、法令に違反する行為</li>
++          </ul>
++
++          <h2 className="text-lg font-bold text-gray-900 mt-8">第6条（規約の変更）</h2>
++          <p>本規約は予告なく変更される場合があります。変更後の規約は、本ページに掲載した時点で効力を生じます。</p>
++
++          <p className="text-gray-400 mt-8">制定日: 2026年3月4日</p>
++        </div>
++      </div>
++    </main>
++  );
++}
+-- 
+2.50.1 (Apple Git-155)
+
+

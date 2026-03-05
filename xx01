@@ -1,0 +1,306 @@
+From ed26854963359fce6331f9fa02476823fcb1027a Mon Sep 17 00:00:00 2001
+From: R S <rs@arunoMac-mini.local>
+Date: Wed, 4 Mar 2026 15:37:00 +0800
+Subject: [PATCH 02/12] =?UTF-8?q?feat:=20=E7=B5=90=E6=9E=9C=E3=83=9A?=
+ =?UTF-8?q?=E3=83=BC=E3=82=B8=E6=94=B9=E4=BF=AE=20-=20=E3=83=81=E3=82=A7?=
+ =?UTF-8?q?=E3=83=83=E3=82=AF=E3=83=9C=E3=83=83=E3=82=AF=E3=82=B9=E9=81=B8?=
+ =?UTF-8?q?=E6=8A=9E=E5=BC=8F+=E5=9B=BA=E5=AE=9A=E3=83=95=E3=83=83?=
+ =?UTF-8?q?=E3=82=BF=E3=83=BCCTA?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- 各補助金にチェックボックス追加（デフォルト全選択）
+- すべて選択/すべて解除ボタン
+- 選択した件数をサマリーとCTAに反映
+- 固定フッターに「選択したN件をLINEで一括申請する」ボタン
+- 未選択時はボタン無効化
+- 詳細ページへのリンクを削除（詳細はLINE@内で表示）
+- 除外ボタンを選択チェックボックスに統合
+---
+ frontend/src/app/results/page.tsx | 204 +++++++++++++++++-------------
+ 1 file changed, 118 insertions(+), 86 deletions(-)
+
+diff --git a/frontend/src/app/results/page.tsx b/frontend/src/app/results/page.tsx
+index 34dc7fe..7e8e905 100644
+--- a/frontend/src/app/results/page.tsx
++++ b/frontend/src/app/results/page.tsx
+@@ -73,12 +73,15 @@ function formatAmount(amount: number | null): string {
+ export default function Results() {
+   const router = useRouter();
+   const [result, setResult] = useState<DiagnosisResult | null>(null);
+-  const [excluded, setExcluded] = useState<Set<string>>(new Set());
++  const [selected, setSelected] = useState<Set<string>>(new Set());
+ 
+   useEffect(() => {
+     const stored = sessionStorage.getItem("diagnosisResult");
+     if (stored) {
+-      setResult(JSON.parse(stored));
++      const parsed = JSON.parse(stored) as DiagnosisResult;
++      setResult(parsed);
++      // デフォルトで全て選択
++      setSelected(new Set(parsed.matches.map((m) => m.subsidy_id)));
+     } else {
+       router.push("/");
+     }
+@@ -88,13 +91,12 @@ export default function Results() {
+     return <div className="min-h-screen flex items-center justify-center">読み込み中...</div>;
+   }
+ 
+-  const activeMatches = result.matches.filter((m) => !excluded.has(m.subsidy_id));
+-  const totalEstimated = activeMatches.reduce((sum, m) => sum + (m.estimated_amount || 0), 0);
++  const selectedMatches = result.matches.filter((m) => selected.has(m.subsidy_id));
++  const totalEstimated = selectedMatches.reduce((sum, m) => sum + (m.estimated_amount || 0), 0);
++  const totalMax = selectedMatches.reduce((sum, m) => sum + (m.max_amount || 0), 0);
+ 
+-  const toggleExclude = (id: string, e: React.MouseEvent) => {
+-    e.preventDefault();
+-    e.stopPropagation();
+-    setExcluded((prev) => {
++  const toggleSelect = (id: string) => {
++    setSelected((prev) => {
+       const next = new Set(prev);
+       if (next.has(id)) next.delete(id);
+       else next.add(id);
+@@ -102,6 +104,14 @@ export default function Results() {
+     });
+   };
+ 
++  const selectAll = () => {
++    setSelected(new Set(result.matches.map((m) => m.subsidy_id)));
++  };
++
++  const deselectAll = () => {
++    setSelected(new Set());
++  };
++
+   return (
+     <main className="min-h-screen bg-gray-50 py-12 px-4">
+       <div className="max-w-3xl mx-auto">
+@@ -113,39 +123,58 @@ export default function Results() {
+         {result.matches.length === 0 ? (
+           <div className="bg-white rounded-lg shadow p-8 text-center">
+             <p className="text-gray-500 text-lg">該当する補助金が見つかりませんでした</p>
+-            <Link href="/" className="text-blue-600 underline mt-4 inline-block">条件を変えて再診断</Link>
++            <Link href="/diagnosis" className="text-blue-600 underline mt-4 inline-block">条件を変えて再診断</Link>
+           </div>
+         ) : (
+           <>
+             {/* 総額サマリー */}
+             <div className="bg-blue-600 text-white rounded-lg shadow p-6 mb-6 text-center">
+-              <p className="text-sm opacity-80 mb-1">あなたがマッチした補助金の総額</p>
+-              <p className="text-4xl font-bold mb-1">{formatAmount(activeMatches.reduce((sum, m) => sum + (m.max_amount || 0), 0))}</p>
++              <p className="text-sm opacity-80 mb-1">選択した補助金の総額</p>
++              <p className="text-4xl font-bold mb-1">{formatAmount(totalMax)}</p>
+               <p className="text-sm opacity-80 mt-1">（受給目安額の合計: {formatAmount(totalEstimated)}）</p>
+-              <p className="text-sm opacity-80">{activeMatches.length}件の補助金が対象</p>
++              <p className="text-sm opacity-80">{selectedMatches.length}/{result.matches.length}件を選択中</p>
+             </div>
+ 
+-            {/* LINE@一括申請ボタン */}
+-            <div className="mb-6">
+-              <a
+-                href={`https://line.me/R/ti/p/DUMMY_LINE_ID?subsidies=${activeMatches.map(m => m.subsidy_id).join(",")}&total=${totalEstimated}`}
+-                target="_blank"
+-                rel="noopener noreferrer"
+-                className="block w-full bg-[#06C755] text-white py-4 rounded-lg font-bold text-lg hover:bg-[#05b34c] transition-colors text-center"
+-              >
+-                LINEで相談する
+-              </a>
+-              <p className="text-xs text-gray-400 text-center mt-2">提携行政書士が申請をサポートします</p>
++            {/* 選択操作 */}
++            <div className="flex justify-between items-center mb-4">
++              <p className="text-sm text-gray-500">申請したい補助金を選択してください</p>
++              <div className="flex gap-2">
++                <button
++                  onClick={selectAll}
++                  className="text-xs text-blue-600 hover:underline"
++                >
++                  すべて選択
++                </button>
++                <span className="text-gray-300">|</span>
++                <button
++                  onClick={deselectAll}
++                  className="text-xs text-gray-500 hover:underline"
++                >
++                  すべて解除
++                </button>
++              </div>
+             </div>
+ 
+             {/* 補助金明細 */}
+             <div className="space-y-4">
+               {result.matches.map((m) => {
+-                const isExcluded = excluded.has(m.subsidy_id);
++                const isSelected = selected.has(m.subsidy_id);
+                 return (
+-                  <div key={m.subsidy_id} className={`bg-white rounded-lg shadow p-6 transition-opacity ${isExcluded ? "opacity-50" : ""}`}>
+-                    <Link href={`/subsidy/${m.subsidy_id}`} className="block">
+-                      <div className="flex items-start justify-between mb-3">
++                  <div
++                    key={m.subsidy_id}
++                    className={`bg-white rounded-lg shadow p-6 transition-all cursor-pointer border-2 ${
++                      isSelected ? "border-blue-500" : "border-transparent opacity-60"
++                    }`}
++                    onClick={() => toggleSelect(m.subsidy_id)}
++                  >
++                    <div className="flex items-start justify-between mb-3">
++                      <div className="flex items-start gap-3">
++                        {/* チェックボックス */}
++                        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center flex-shrink-0 mt-1 ${
++                          isSelected ? "bg-blue-500 border-blue-500" : "border-gray-300"
++                        }`}>
++                          {isSelected && <span className="text-white text-sm">✓</span>}
++                        </div>
+                         <div>
+                           <div className="flex items-center gap-2 mb-1">
+                             <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">
+@@ -157,82 +186,85 @@ export default function Results() {
+                           </div>
+                           <h2 className="text-lg font-bold text-gray-900">{m.subsidy_name}</h2>
+                         </div>
+-                        <div className="text-right">
+-                          <Stars count={m.fit_score} />
+-                          <div className="mt-1">
+-                            <DifficultyBadge rank={m.difficulty_rank} />
+-                          </div>
++                      </div>
++                      <div className="text-right">
++                        <Stars count={m.fit_score} />
++                        <div className="mt-1">
++                          <DifficultyBadge rank={m.difficulty_rank} />
+                         </div>
+                       </div>
++                    </div>
+ 
+-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+-                        <div>
+-                          <span className="text-xs text-gray-500">受給目安額</span>
+-                          <p className="text-xl font-bold text-blue-600">{formatAmount(m.estimated_amount)}</p>
+-                        </div>
+-                        <div>
+-                          <span className="text-xs text-gray-500">補助上限</span>
+-                          <p className="text-lg text-gray-700">{formatAmount(m.max_amount)}</p>
+-                        </div>
+-                        <div>
+-                          <span className="text-xs text-gray-500">入金までの目安</span>
+-                          <p className="text-sm text-gray-700">{PAYMENT_TIMELINE[m.category] || "採択後 約4〜8ヶ月"}</p>
+-                        </div>
++                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 ml-9">
++                      <div>
++                        <span className="text-xs text-gray-500">受給目安額</span>
++                        <p className="text-xl font-bold text-blue-600">{formatAmount(m.estimated_amount)}</p>
+                       </div>
++                      <div>
++                        <span className="text-xs text-gray-500">補助上限</span>
++                        <p className="text-lg text-gray-700">{formatAmount(m.max_amount)}</p>
++                      </div>
++                      <div>
++                        <span className="text-xs text-gray-500">入金までの目安</span>
++                        <p className="text-sm text-gray-700">{PAYMENT_TIMELINE[m.category] || "採択後 約4〜8ヶ月"}</p>
++                      </div>
++                    </div>
+ 
+-                      {m.match_reasons.length > 0 && (
+-                        <div className="mb-2">
+-                          <span className="text-xs text-gray-500">マッチ理由:</span>
+-                          <div className="flex flex-wrap gap-1 mt-1">
+-                            {m.match_reasons.map((r, i) => (
+-                              <span key={i} className="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded">
+-                                ✓ {r}
+-                              </span>
+-                            ))}
+-                          </div>
++                    {m.match_reasons.length > 0 && (
++                      <div className="mb-2 ml-9">
++                        <span className="text-xs text-gray-500">マッチ理由:</span>
++                        <div className="flex flex-wrap gap-1 mt-1">
++                          {m.match_reasons.map((r, i) => (
++                            <span key={i} className="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded">
++                              ✓ {r}
++                            </span>
++                          ))}
+                         </div>
+-                      )}
++                      </div>
++                    )}
+ 
+-                      {m.unmatch_reasons.length > 0 && (
+-                        <div>
+-                          <span className="text-xs text-gray-500">注意点:</span>
+-                          <div className="flex flex-wrap gap-1 mt-1">
+-                            {m.unmatch_reasons.map((r, i) => (
+-                              <span key={i} className="bg-red-50 text-red-700 text-xs px-2 py-0.5 rounded">
+-                                △ {r}
+-                              </span>
+-                            ))}
+-                          </div>
++                    {m.unmatch_reasons.length > 0 && (
++                      <div className="ml-9">
++                        <span className="text-xs text-gray-500">注意点:</span>
++                        <div className="flex flex-wrap gap-1 mt-1">
++                          {m.unmatch_reasons.map((r, i) => (
++                            <span key={i} className="bg-red-50 text-red-700 text-xs px-2 py-0.5 rounded">
++                              △ {r}
++                            </span>
++                          ))}
+                         </div>
+-                      )}
+-
+-                      <div className="mt-3 text-right">
+-                        <span className="text-blue-600 text-sm">詳細を見る →</span>
+                       </div>
+-                    </Link>
+-
+-                    {/* 除外ボタン */}
+-                    <div className="mt-3 pt-3 border-t">
+-                      <button
+-                        onClick={(e) => toggleExclude(m.subsidy_id, e)}
+-                        className={`text-sm px-3 py-1 rounded ${
+-                          isExcluded
+-                            ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+-                            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+-                        }`}
+-                      >
+-                        {isExcluded ? "✓ 申請対象に戻す" : "✕ この補助金の申請を除外する"}
+-                      </button>
+-                    </div>
++                    )}
+                   </div>
+                 );
+               })}
+             </div>
++
++            {/* LINE@一括申請ボタン（固定フッター） */}
++            <div className="sticky bottom-0 bg-white border-t shadow-lg p-4 -mx-4 mt-8 rounded-t-xl">
++              <a
++                href={`https://line.me/R/ti/p/DUMMY_LINE_ID?subsidies=${selectedMatches.map(m => m.subsidy_id).join(",")}&total=${totalEstimated}&names=${encodeURIComponent(selectedMatches.map(m => m.subsidy_name).join(","))}`}
++                target="_blank"
++                rel="noopener noreferrer"
++                className={`block w-full py-4 rounded-lg font-bold text-lg text-center transition-all ${
++                  selectedMatches.length > 0
++                    ? "bg-[#06C755] text-white hover:bg-[#05b34c]"
++                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
++                }`}
++                onClick={(e) => { if (selectedMatches.length === 0) e.preventDefault(); }}
++              >
++                {selectedMatches.length > 0
++                  ? `選択した${selectedMatches.length}件をLINEで一括申請する`
++                  : "申請する補助金を選択してください"
++                }
++              </a>
++              <p className="text-xs text-gray-400 text-center mt-2">提携行政書士が申請をサポートします</p>
++            </div>
+           </>
+         )}
+ 
+         <div className="text-center mt-8">
+-          <Link href="/" className="text-blue-600 underline">条件を変えて再診断</Link>
++          <Link href="/diagnosis" className="text-blue-600 underline">条件を変えて再診断</Link>
+         </div>
+       </div>
+     </main>
+-- 
+2.50.1 (Apple Git-155)
+
+
